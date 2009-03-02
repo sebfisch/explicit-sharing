@@ -2,6 +2,11 @@ Name:          explicit-sharing
 Version:       0.1
 Cabal-Version: >= 1.6
 Synopsis:      Explicit Sharing of Monadic Effects
+Description:   
+
+  This package implements a monad transformer for sharing monadic
+  effects of monads for non-determinism.
+
 Category:      Control, Monads
 License:       PublicDomain
 License-File:  LICENSE
