@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, Rank2Types #-}
+
 module Control.Monad.Trans.ContT where
 
 import Control.Monad.State

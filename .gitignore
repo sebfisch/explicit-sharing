@@ -1,4 +1,8 @@
 .DS_Store
 *.hi
 *.o
+*.icurry
+*.fun
+*.mcc
+*.mon
 dist/*

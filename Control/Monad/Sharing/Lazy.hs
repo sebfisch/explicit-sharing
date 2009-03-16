@@ -4,12 +4,10 @@ module Control.Monad.Sharing.Lazy (
 
   Lazy, runLazy, evalLazy,
 
-  module Control.Monad,
   module Control.Monad.Sharing
 
  ) where
 
-import Control.Monad
 import Control.Monad.Sharing
 import Control.Monad.Sharing.Lazy.ContReaderNoThunksInlined
 

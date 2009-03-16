@@ -3,7 +3,12 @@
      Rank2Types
   #-}
 
-module Control.Monad.Sharing where
+module Control.Monad.Sharing (
+
+  module Control.Monad, 
+  module Control.Monad.Sharing
+
+ ) where
 
 import Control.Monad
 
