@@ -13,7 +13,7 @@ module Control.Monad.Sharing.Memoization (
 
 import qualified Data.IntMap as M
 
-import Data.Monoid
+import Data.Monoid ()
 
 import Control.Monad.State
 import Control.Monad.Writer

@@ -23,7 +23,7 @@ Library
   Exposed-Modules:  Control.Monad.Trans.ContT,
                     Control.Monad.Sharing,
                     Control.Monad.Sharing.Lazy
-                    Control.Monad.Sharing.Lazy.State,
+                    Control.Monad.Sharing.Lazy.Simple,
                     Control.Monad.Sharing.Lazy.ContReader,
                     Control.Monad.Sharing.Lazy.ContReaderNoThunks,
                     Control.Monad.Sharing.Lazy.ContReaderNoThunksInlined
