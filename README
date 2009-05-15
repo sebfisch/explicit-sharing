@@ -8,8 +8,9 @@ This package is available on Hackage:
 
   http://hackage.haskell.org/cgi-bin/hackage-scripts/package/explicit-sharing
 
-This repository also contains two benchmark programs: permsort and
-naive reverse both for Haskell and Curry.
+This repository also contains three benchmark programs: permsort,
+naive reverse, and a functional-logic last function -- all for Haskell
+and Curry.
 
 Instructions on how to compile the benchmarks can be found in the
 corresponding source files.

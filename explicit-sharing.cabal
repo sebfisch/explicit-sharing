@@ -1,5 +1,5 @@
 Name:          explicit-sharing
-Version:       0.1
+Version:       0.1.1
 Cabal-Version: >= 1.6
 Synopsis:      Explicit Sharing of Monadic Effects
 Description:   
