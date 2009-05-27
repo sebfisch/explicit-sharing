@@ -124,13 +124,12 @@ first ml = do Cons x _ <- ml; x
 rest :: MonadPlus m => m (List m a) -> m (List m a)
 rest ml = do Cons _ xs <- ml; xs
 
-instance (Monad m, Trans m a a) => Trans m (List m a) (List m a)
+instance (Monad m, Trans m a b) => Trans m (List m a) (List m b)
  where
   trans _ Nil         = return Nil
   trans f (Cons x xs) = return Cons `ap` f x `ap` f xs
 
-instance (Monad m, Trans m a a) => Trans m (List m a) [a]
+instance (Monad m, Trans m a b) => Trans m (List m a) [b]
  where
   trans _ Nil         = return []
   trans f (Cons x xs) = return (:) `ap` join (f x) `ap` join (f xs)
-
