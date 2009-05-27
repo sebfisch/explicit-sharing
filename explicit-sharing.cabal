@@ -16,6 +16,8 @@ Bug-Reports:   http://github.com/sebfisch/explicit-sharing/issues
 Build-Type:    Custom
 Stability:     experimental
 
+Extra-Source-Files: Test.hs
+
 Library
   Build-Depends:    base, containers, mtl
   Exposed-Modules:  Control.Monad.Sharing,

@@ -1,7 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses, 
-             FlexibleInstances,
-             Rank2Types 
-  #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, Rank2Types #-}
 
 -- | Module      : Control.Monad.Sharing
 -- | Copyright   : Sebastian Fischer
@@ -58,7 +55,7 @@ class Trans m a b
 -- | data structure with nested non-determinism then the result
 -- | corresponds to the normal form of the argument.
 eval :: (Monad m, Trans m a b) => a -> m b
-eval = trans (\a -> a >>= eval >>= return . return)
+eval = trans (\a -> liftM return (a >>= eval))
 
 -- $predefined 
 --

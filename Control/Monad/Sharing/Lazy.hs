@@ -4,6 +4,8 @@
              Rank2Types 
   #-}
 
+{-# OPTIONS -fno-warn-name-shadowing #-}
+
 -- | Module      : Control.Monad.Sharing.Lazy
 -- | Copyright   : Sebastian Fischer
 -- | License     : PublicDomain
@@ -80,9 +82,6 @@ instance Monad m => MonadState Store (Lazy m)
 instance Monad m => Sharing (Lazy m)
  where
   share a = memo (a >>= trans share)
-
-withTypeOf :: a -> a -> a
-withTypeOf = const
 
 -- This is an inlined version of the following definition:
 -- 
