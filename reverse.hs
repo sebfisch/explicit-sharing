@@ -3,8 +3,20 @@
 -- naive reverse to compare performance of purely functional programs
 -- with monadic deterministic programs.
 
+-- to compile, run:
+-- ghc -fglasgow-exts -hide-package monads-fd -O2 -o reverse.mon --make reverse.hs
+
+-- $ time ./reverse.fun 20000
+-- user	0m8.637s
+
+-- $ time ./reverse.mon 20000
+-- user	0m10.995s
+
+-- $ time ./reverse.mcc 20000
+-- user	0m14.522s
+
+
 import Control.Monad.Sharing.Lazy
-import List
 
 import System ( getArgs )
 
@@ -19,7 +31,8 @@ rev (x:xs) = rev xs ++ [x]
 
 main_mon =
  do n <- liftM (read.head) getArgs
-    print . head . evalLazy $ length' =<< rev' =<< enumFromTo' 1 n
+    let result = evalLazy $ length' =<< rev' =<< enumFromTo' 1 n
+    mapM_ print (result :: [Int])
 
 length' :: Monad m => List m a -> m Int
 length' Nil         = return 0
