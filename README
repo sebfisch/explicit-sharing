@@ -11,3 +11,12 @@ This package is available on Hackage:
 It can be installed using cabal install:
 
   cabal install explicit-sharing
+
+This repository also contains benchmark programs: 'permsort', 'naive
+reverse' and 'logic last' -- all for Haskell and Curry.
+ 
+Instructions on how to compile the benchmarks can be found in the
+corresponding source files.
+ 
+Regression tests can be found in Test.hs and run using 'cabal test'.
+ 
