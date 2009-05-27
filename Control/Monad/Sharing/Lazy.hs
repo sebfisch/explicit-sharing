@@ -72,12 +72,6 @@ instance MonadPlus m => MonadPlus (Lazy m)
   mzero       = Lazy (\_ _ -> mzero)
   a `mplus` b = Lazy (\c s -> fromLazy a c s `mplus` fromLazy b c s)
 
--- With continuations, a reader monad can be made a state monad.
-instance Monad m => MonadState Store (Lazy m)
- where
-  get   = Lazy (\c s -> c s s)
-  put s = Lazy (\c _ -> c () s)
-
 -- The @Sharing@ instance memoizes nested monadic values recursively.
 instance Monad m => Sharing (Lazy m)
  where
