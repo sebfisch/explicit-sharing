@@ -1,6 +1,0 @@
-interface reverse where {
-import Prelude;
-main :: Prelude.IO ();
-rev :: [a] -> [a];
-{-# DATA Prelude.IO a #-}
-}
