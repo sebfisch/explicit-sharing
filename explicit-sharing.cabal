@@ -1,36 +1,27 @@
 Name:          explicit-sharing
-Version:       0.1.1
+Version:       0.3.1
 Cabal-Version: >= 1.6
 Synopsis:      Explicit Sharing of Monadic Effects
 Description:   
 
   This package implements a monad transformer for sharing monadic
-  effects of monads for non-determinism.
+  effects.
 
 Category:      Control, Monads
 License:       PublicDomain
 License-File:  LICENSE
 Author:        Chung-chieh Shan, Oleg Kiselyov, and Sebastian Fischer
 Maintainer:    sebf@informatik.uni-kiel.de
-Bug-Reports:   mailto:sebf@informatik.uni-kiel.de
+Bug-Reports:   http://github.com/sebfisch/explicit-sharing/issues
 Build-Type:    Custom
 Stability:     experimental
 
-Extra-Source-Files: Test.hs, List.hs
-
 Library
   Build-Depends:    base, containers, mtl
-  Exposed-Modules:  Control.Monad.Trans.ContT,
-                    Control.Monad.Sharing,
+  Exposed-Modules:  Control.Monad.Sharing,
                     Control.Monad.Sharing.Lazy
-                    Control.Monad.Sharing.Lazy.State,
-                    Control.Monad.Sharing.Lazy.ContReader,
-                    Control.Monad.Sharing.Lazy.ContReaderNoThunks,
-                    Control.Monad.Sharing.Lazy.ContReaderNoThunksInlined
-  Other-Modules:    Control.Monad.Sharing.Memoization
   Ghc-Options:      -Wall
-  Extensions:       GeneralizedNewtypeDeriving,
-                    ExistentialQuantification,
+  Extensions:       ExistentialQuantification,
                     MultiParamTypeClasses,
                     FlexibleInstances,
                     FlexibleContexts,
