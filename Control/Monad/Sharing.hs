@@ -25,7 +25,7 @@ module Control.Monad.Sharing (
 
   -- * Monadic lists
 
-  List(..), nil, cons
+  List(..), nil, cons, isEmpty, first, rest
 
  ) where
 
@@ -106,6 +106,23 @@ nil = return Nil
 -- | Constructs a non-empty monadic list.
 cons :: Monad m => m a -> m (List m a) -> m (List m a)
 cons x xs = return (Cons x xs)
+
+-- | Checks if monadic list is empty.
+isEmpty :: Monad m => m (List m a) -> m Bool
+isEmpty ml = do l <- ml
+                case l of
+                  Nil      -> return True
+                  Cons _ _ -> return False
+
+-- | Yields the head of a monadic list. Relies on @MonadPlus@ instance
+-- | to provide a failing implementation of @fail@.
+first :: MonadPlus m => m (List m a) -> m a
+first ml = do Cons x _ <- ml; x
+
+-- | Yields the tail of a monadic list. Relies on @MonadPlus@ instance
+-- | to provide a failing implementation of @fail@.
+rest :: MonadPlus m => m (List m a) -> m (List m a)
+rest ml = do Cons _ xs <- ml; xs
 
 instance (Monad m, Trans m a a) => Trans m (List m a) (List m a)
  where
