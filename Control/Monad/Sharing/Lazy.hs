@@ -81,7 +81,11 @@ instance Monad m => MonadState Store (Lazy m)
 -- The @Sharing@ instance memoizes nested monadic values recursively.
 instance Monad m => Sharing (Lazy m)
  where
-  share a = memo (a >>= trans share)
+  share = lazy
+
+-- The more general type is necessary to please the type checker.
+lazy :: (Monad m, Trans (Lazy m) a b) => Lazy m a -> Lazy m (Lazy m b)
+lazy a = memo (a >>= trans lazy)
 
 -- This is an inlined version of the following definition:
 -- 

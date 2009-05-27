@@ -38,7 +38,7 @@ class Sharing m
   -- | action but whose effects are only executed once. Especially,
   -- | when the resulting action is duplicated it returns the same
   -- | result at every occurrence.
-  share :: Trans m a b => m a -> m (m b)
+  share :: Trans m a a => m a -> m (m a)
 
 -- | Interface to transform nested monadic data types. The provided
 -- | function @trans@ is supposed to map the given function on every
