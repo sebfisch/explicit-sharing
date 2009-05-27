@@ -1,13 +1,12 @@
 {-# LANGUAGE
      NoMonomorphismRestriction,
      MultiParamTypeClasses,
+     OverlappingInstances,
      FlexibleInstances,
      FlexibleContexts
   #-}
 
 import Control.Monad.Sharing.Lazy
-
-import List
 
 main = do
   putStr "failing tests: "
@@ -16,32 +15,30 @@ main = do
   tests = [ dup_coin_let, dup_coin_bind, dup_coin_share
           , lazy_share, heads_bind, heads_share, dup_first_coin
           , one_coin, two_coins, dup_coin, dupnot_coin
-          , first_rep, first_rep', rep_coin, rep_coin'
-          , dup_list, ignore_shared, empty_rep, empty_rep'
+          , first_rep, rep_coin
+          , dup_list, ignore_shared, empty_rep
           , nest_lazy, nest_share1, nest_share2
           , dup_dup, dup_two_coins, dup_head, dup_head_lazy
           ]
 
-instance MonadPlus m => Nondet m Bool
+instance Monad m => Trans m (Int,Int) (Int,Int)
  where
-  mapNondet _ = return
+  trans _ = return
 
-instance MonadPlus m => Nondet m (Int,Int)
+-- instance (Trans m a a, Trans m b b) => Trans m (m a,m b) (m a,m b)
+--  where
+--   trans f (a,b) = return (,) `ap` f a `ap` f b
+
+instance Monad m => Trans m (m Int, m Int) (m Int, m Int)
  where
-  mapNondet _ = return
+  trans f (a,b) = return (,) `ap` f a `ap` f b
 
-instance (Nondet m a, Nondet m b) => Nondet m (m a,m b)
+instance (Monad m, Trans m a c, Trans m b d) => Trans m (m a,m b) (c,d)
  where
-  mapNondet f (a,b) = return (,) `ap` f a `ap` f b
+  trans f (a,b) = return (,) `ap` join (f a) `ap` join (f b)
 
-fromList _ Nil         = return []
-fromList f (Cons x xs) = do y <- x >>= f; ys <- xs >>= fromList f; return (y:ys)
-
-fromPair l r (a,b) = do x <- a >>= l; y <- b >>= r; return (x,y)
-
-assertEqual :: (Nondet (Lazy []) a, Eq b)
-            => (a -> Lazy [] b) -> [b] -> Lazy [] a -> Bool
-assertEqual f res test = zipEq (runLazy (test >>= eval >>= f)) res
+assertEqual :: (Trans (Lazy []) a b, Eq b) => [b] -> Lazy [] a -> Bool
+assertEqual res test = zipEq (evalLazy test) res
  where
   zipEq [] [] = True
   zipEq [] _  = False
@@ -51,25 +48,19 @@ assertEqual f res test = zipEq (runLazy (test >>= eval >>= f)) res
 coin :: MonadPlus m => m Int
 coin = return 0 `mplus` return 1
 
-ilist = fromList return
-illist = fromList ilist
-ipair = fromPair return return
-pilist = fromPair ilist ilist
-ippair = fromPair ipair ipair
-
 -- examples from paper
 
 duplicate :: Monad m => m a -> m (a,a)
 duplicate a = do x <- a; y <- a; return (x,y)
 
-dup_coin_let = assertEqual return [(0,0),(0,1),(1,0),(1,1)] $ 
+dup_coin_let = assertEqual [(0,0)::(Int,Int),(0,1),(1,0),(1,1)] $ 
                  let x = coin in duplicate x
 
-dup_coin_bind  = assertEqual return [(0,0),(1,1)] $ do
+dup_coin_bind  = assertEqual [(0,0)::(Int,Int),(1,1)] $ do
                    x <- coin
                    duplicate (return x)
 
-dup_coin_share = assertEqual return [(0,0),(1,1)] $ do
+dup_coin_share = assertEqual [(0,0)::(Int,Int),(1,1)] $ do
                    x <- share coin
                    duplicate x
 
@@ -77,107 +68,103 @@ dup_coin_share = assertEqual return [(0,0),(1,1)] $ do
 --   do x <- undefined :: Lazy [] Int
 --      duplicate (const (return 2) (return x))
 
-lazy_share = assertEqual return [(2::Int,2::Int)] $
+lazy_share = assertEqual [(2::Int,2::Int)] $
   do x <- share (undefined :: Lazy [] Int)
-     duplicate (const (return 2) x)
+     duplicate (const (return (2::Int)) x)
 
 dupl :: Monad m => m a -> m (List m a)
 dupl x = cons x (cons x nil)
 
-heads_bind = assertEqual ilist [[0,0],[0,1],[1,0],[1,1]] $ do
+heads_bind = assertEqual [[0,0::Int],[0,1],[1,0],[1,1]] $ do
                x <- cons coin undefined
 	       dupl (first (return x))
 
-heads_share = assertEqual ilist [[0,0],[1,1]] $ do
+heads_share = assertEqual [[0,0::Int],[1,1]] $ do
                 x <- share (cons coin undefined)
                 dupl (first x)
 
 coins :: MonadPlus m => m (List m Int)
 coins = nil `mplus` cons coin coins
 
-dup_first_coin = assertEqual ilist [[0,0],[1,1]] $ do
+dup_first_coin = assertEqual [[0::Int,0],[1,1]] $ do
                    cs <- share coins
                    dupl (first cs)
 
 -- other examples
 
-one_coin = assertEqual return [0,1] coin
+one_coin = assertEqual [0,1::Int] coin
 
-two_coins = assertEqual ipair [(0,0),(0,1),(1,0),(1,1)] $ return (coin,coin)
+two_coins = assertEqual [(0,0),(0::Int,1::Int),(1,0),(1,1)] $
+              return (coin :: Lazy [] Int, coin :: Lazy [] Int)
 
-dup_coin = assertEqual ipair [(0,0),(1,1)] $ dup coin
+dup_coin = assertEqual [(0::Int,0::Int),(1,1)] $ dup coin
 
+dup :: (Monad m, Sharing m, Trans m a a) => m a -> m (m a, m a)
 dup a = do
   x <- share a
   return (x,x)
 
-dupnot_coin = assertEqual ipair [(1,1),(0,0)] $ dupnot coin
+dupnot_coin = assertEqual [(1::Int,1::Int),(0,0)] $ dupnot coin
 
 dupnot a = do
   x <- share a
   return (liftM ((-)1) x, liftM ((-)1) x)
 
-first_rep = assertEqual return [42::Int] $ first (first (rep (rep (return 42))))
+first_rep = assertEqual [42::Int] $ 
+              first (first (rep (rep (return (42::Int)))))
 
 rep a = do
   x <- share a
   cons x (rep x)
 
-first_rep' = assertEqual return [42::Int] $
-               first (first (rep' (rep' (return 42))))
+rep_coin = assertEqual [(0::Int,0::Int),(1,1)] $ do
+             Cons x xs <- rep coin
+             return (x, first xs)
 
-rep' a = do
-  xs <- shareRec (\l -> cons a l)
-  xs
-
-rep_coin = assertEqual ipair [(0::Int,0::Int),(1,1)] $
-             rep coin >>= match mzero (\x xs -> return (x, first xs))
-
--- recursive bindings do not work as expected:
-rep_coin' = assertEqual ipair [(0::Int,0::Int),(0,1),(1,0),(1,1)] $
-              rep' coin >>= match mzero (\x xs -> return (x, first xs))
-
-dup_list = assertEqual pilist [([],[])
-                              ,([0],[0])
-                              ,([0,0],[0,0])
-                              ,([0,0,0],[0,0,0])] $
+dup_list = assertEqual [([],[])
+                       ,([0::Int],[0::Int])
+                       ,([0,0],[0,0])
+                       ,([0,0,0],[0,0,0])] $
              dup coins
 
-ignore_shared = assertEqual ipair [(0,1)] $ ign_pair mzero
+ignore_shared = assertEqual [(0::Int,1::Int)] $ ign_pair mzero
 
-ign_pair :: Sharing m => m Int -> m (m Int,m Int)
+ign_pair :: Lazy [] Int -> Lazy [] (Lazy [] Int,Lazy [] Int)
 ign_pair a = do
-  x <- share a
+  x <- share (a :: Lazy [] Int)
   return (const (return 0) x, const (return 1) x)
 
-empty_rep = assertEqual return [False] $ empty (rep (undefined::Lazy [] Int))
+empty_rep = assertEqual [False] $ isEmpty (rep (undefined::Lazy [] Int))
 
-empty_rep' = assertEqual return [False] $ empty (rep' (undefined::Lazy [] Int))
-
-nest_lazy = assertEqual return [42::Int] $ do
+nest_lazy = assertEqual [42::Int] $ do
   x <- share (cons (return 42) mzero)
-  first x
+  first x :: Lazy [] Int
 
-nest_share1 = assertEqual ipair [(0,0),(1,1)] $ do
+nest_share1 = assertEqual [(0::Int,0::Int),(1,1)] $ do
   x <- share (share (return True) >> coin)
   return (x,x)
 
-nest_share2 = assertEqual ipair [(0,0),(1,1)] $ do
+nest_share2 = assertEqual [(0::Int,0::Int),(1,1)] $ do
   x <- share (share coin >>= id)
   return (x,x)
 
-dup_dup = assertEqual ippair [((0,0),(0,0)),((1,1),(1,1))] $ dup (dup coin)
+dup_dup = assertEqual [((0::Int,0::Int),(0::Int,0::Int)),((1,1),(1,1))] $ 
+            (dup (dup coin :: Lazy [] (Lazy [] Int,Lazy [] Int))
+              :: Lazy [] (Lazy [] (Lazy [] Int,Lazy [] Int),
+                          Lazy [] (Lazy [] Int,Lazy [] Int)))
 
-dup_two_coins = assertEqual ippair [((0,0),(0,0)),((0,1),(0,1))
-                                   ,((1,0),(1,0)),((1,1),(1,1))] $ do
+dup_two_coins = assertEqual [((0::Int,0::Int),(0::Int,0::Int)),((0,1),(0,1))
+                            ,((1,0),(1,0)),((1,1),(1,1))] $ do
   x <- share coin
   y <- share coin
-  return (return (x,y), return (x,y))
+  return ( return (x,y) :: Lazy [] (Lazy [] Int, Lazy [] Int)
+         , return (x,y) :: Lazy [] (Lazy [] Int, Lazy [] Int))
 
-dup_head = assertEqual ipair [(0,0),(1,1)] $ heads (cons coin nil)
+dup_head = assertEqual [(0::Int,0::Int),(1,1)] $ heads (cons coin nil)
 
 heads l = do
   xs <- share l
   return (first xs, first xs)
 
-dup_head_lazy = assertEqual ipair [(0,0),(1,1)] $ heads (cons coin undefined)
+dup_head_lazy = assertEqual [(0::Int,0::Int),(1,1)] $
+                  heads (cons coin undefined)
