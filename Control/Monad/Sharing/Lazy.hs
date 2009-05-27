@@ -25,7 +25,6 @@ module Control.Monad.Sharing.Lazy (
 
  ) where
 
-import Control.Monad.State
 import Control.Monad.Sharing
 
 -- For fast and easy implementation of typed stores..
