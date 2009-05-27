@@ -5,26 +5,22 @@
 
 -- $ time ./last 1000000 +RTS -H1000M -K20M
 -- True
--- user	0m1.012s
+-- user	0m2.448s
 
 import Control.Monad.Sharing.Lazy
 import System ( getArgs )
-import List
 
 import Prelude hiding ( last )
 
 main =
  do n <- liftM (read.head) getArgs
-    mapM_ print . evalLazy . last . foldr cons nil . replicate n $ return True
+    let result = evalLazy . last . foldr cons nil . replicate n $ return True
+    mapM_ print (result :: [Bool])
 
-last :: Sharing m => m (List m Bool) -> m Bool
+last :: (MonadPlus m, Sharing m) => m (List m Bool) -> m Bool
 last l = do x <- share freeBool
             l =:= append freeBoolList (cons x nil)
             x
-
-instance MonadPlus m => Nondet m Bool
- where
-  mapNondet _ = return
 
 append :: Monad m => m (List m a) -> m (List m a) -> m (List m a)
 append mxs ys = do xs <- mxs; appendLists xs ys
