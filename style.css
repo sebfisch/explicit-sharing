@@ -1,0 +1,18 @@
+body {
+    font-family: Optima, sans-serif;
+    color: dimgray;
+    line-height: 2em;
+    margin: 10%;
+}
+
+h1, h2 {
+    color: wheat;
+}
+
+h1 {
+    font-size: 7em;
+}
+
+h2 {
+    font-size: 3em;
+}
