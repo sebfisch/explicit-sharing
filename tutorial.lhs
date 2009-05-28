@@ -222,7 +222,7 @@ language in pure Haskell.
 sharing][FLP] is worth a different tutorial.
 
 [lhs]: tutorial.lhs
-[explicit-sharing]: index.htm
+[explicit-sharing]: index.html
 [Typeclassopedia]: http://www.haskell.org/sitewiki/images/8/85/TMR-Issue13.pdf
 [Curry]: http://curry-language.org
 [FLP]: flp.html

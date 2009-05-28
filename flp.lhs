@@ -137,5 +137,5 @@ TODO: non-deterministic higher-order functions
 
 [lhs]: flp.lhs
 [Curry]: http://curry-language.org
-[explicit-sharing]: index.htm
+[explicit-sharing]: index.html
 [tutorial]: tutorial.html
