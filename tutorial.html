@@ -2,21 +2,42 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 ><head
   ><title
-    ></title
+    >how to use explicit sharing</title
     ><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"
      /><meta name="generator" content="pandoc"
-     /><style type="text/css">
-  body { font-family: Optima, sans-serif; width: 40em; }
+     /><style type="text/css"
+    >
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode, table.sourceCode pre 
+   { margin: 0; padding: 0; border: 0; vertical-align: baseline; border: none; }
+td.lineNumbers { border-right: 1px solid #AAAAAA; text-align: right; color: #AAAAAA; padding-right: 5px; padding-left: 5px; }
+td.sourceCode { padding-left: 5px; }
+pre.sourceCode { }
+pre.sourceCode span.Normal { }
+pre.sourceCode span.Keyword { color: #007020; font-weight: bold; } 
+pre.sourceCode span.DataType { color: #902000; }
+pre.sourceCode span.DecVal { color: #40a070; }
+pre.sourceCode span.BaseN { color: #40a070; }
+pre.sourceCode span.Float { color: #40a070; }
+pre.sourceCode span.Char { color: #4070a0; }
+pre.sourceCode span.String { color: #4070a0; }
+pre.sourceCode span.Comment { color: #60a0b0; font-style: italic; }
+pre.sourceCode span.Others { color: #007020; }
+pre.sourceCode span.Alert { color: red; font-weight: bold; }
+pre.sourceCode span.Function { color: #06287e; }
+pre.sourceCode span.RegionMarker { }
+pre.sourceCode span.Error { color: red; font-weight: bold; }
+</style
+    ><style type="text/css">
+  body { font-family: Optima, sans-serif; width: 40em; color: dimgray; }
 
-  h1, h2 { color: midnightblue; }
+  h1, h2 { color: wheat; }
   h2 { margin-top: 1em; }
 
   p { line-height: 1.5em; }
-  p code { color: dimgrey; font-weight: bold; font-size: 1.2em; }
+  p code { font-weight: bold; font-size: 1.2em; }
 
   pre.sourceCode {
     border-left: solid lightsteelblue;
-    // background-color: ghostwhite;
     padding-left: 1em;
   }
 
@@ -30,7 +51,179 @@
 </style>
 </head
   ><body
-  ></body
+  ><h1 class="title"
+    >how to use explicit sharing</h1
+    ><p
+    >This <a href="tutorial.lhs"
+      >literate program</a
+      > explains how to use the <a href="index.htm"
+      >explicit-sharing</a
+      > package which provides the following module.</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Keyword"
+	>import</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal ModuleName"
+	>Control.Monad.Sharing.Lazy</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >The interface of this module basically consists of two type classes. Instances of <code
+      >Sharing</code
+      > support a combinator <code
+      >share</code
+      > for explicit sharing and are usually monads. If you fell like you don't know enough about monads you may want to look at the <a href="http://www.haskell.org/sitewiki/images/8/85/TMR-Issue13.pdf"
+      >Typeclassopedia</a
+      >.</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Keyword"
+	>class</span
+	><span class="Normal NormalText"
+	> Sharing m</span
+	><br
+	 /><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>where</span
+	><br
+	 /><span class="Normal NormalText"
+	>  </span
+	><span class="Function FunctionDefinition"
+	>share ::</span
+	><span class="Normal NormalText"
+	> Trans m a a =&gt; m a -&gt; m (m a)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >The type class <code
+      >Trans</code
+      > provides an interface for generic traversals of nested monadic data types. We will come back to them later. For now, just think of <code
+      >Trans</code
+      > to specify data that can be shared explicitly.</p
+    ><p
+    >The function <code
+      >share</code
+      > takes a monadic action of type <code
+      >m a</code
+      > and yields an action in the same monad which yields a monadic action of the same type as the argument. The idea is that <code
+      >share</code
+      > yields something like the original action which can be duplicated without duplicating the effects.</p
+    ><h2 id="sharing-io-effects"
+    >sharing IO effects</h2
+    ><p
+    >Let's look at an example. First consider a program that does not use explicit sharing.</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>dup_get ::</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="DataType TypeConstructor"
+	>IO</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="DataType TypeConstructor"
+	>String</span
+	><br
+	 /><span class="Normal NormalText"
+	>dup_get = </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>let</span
+	><span class="Normal NormalText"
+	> get = </span
+	><span class="Function"
+	>getChar</span
+	><br
+	 /><span class="Normal NormalText"
+	>             a &lt;- get</span
+	><br
+	 /><span class="Normal NormalText"
+	>             b &lt;- get</span
+	><br
+	 /><span class="Normal NormalText"
+	>             c &lt;- get</span
+	><br
+	 /><span class="Normal NormalText"
+	>             </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> [a,b,c]</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >This action renames the predefined action <code
+      >getChar</code
+      > and calls it three times returning a list of the results of the three calls:</p
+    ><pre
+    ><code
+      >*Main&gt; dup_get
+xyz
+&quot;xyz&quot;
+</code
+      ></pre
+    ><p
+    >Each occurrence of <code
+      >get</code
+      > reads a different character from standard input, i.e., has its own independent input effect and all occurrences of <code
+      >get</code
+      > can have different results. Haskells <code
+      >let</code
+      > construct shares the IO action <code
+      >getChar</code
+      > which can still be executed independently more than once.</p
+    ><p
+    >The <code
+      >share</code
+      > combinator provides a different kind of sharing. An IO action that is shared explicitly using <code
+      >share</code
+      > can still be executed multiple times but its effects are only performed on first execution and an explicitly shared action will return the same result whenever it is executed. Moreover, if the result of explicitly sharing an action is never executed then the action provided to <code
+      >share</code
+      > is also never executed.</p
+    ><p
+    >Here is a variant of the above action with explicit sharing.</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>dup_shared_get ::</span
+	><span class="Normal NormalText"
+	> (MonadIO m, Sharing m) =&gt; m </span
+	><span class="DataType TypeConstructor"
+	>String</span
+	><br
+	 /><span class="Normal NormalText"
+	>dup_shared_get = </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> get &lt;- share (liftIO </span
+	><span class="Function"
+	>getChar</span
+	><span class="Normal NormalText"
+	>)</span
+	><br
+	 /><span class="Normal NormalText"
+	>                    a &lt;- get</span
+	><br
+	 /><span class="Normal NormalText"
+	>                    b &lt;- get</span
+	><br
+	 /><span class="Normal NormalText"
+	>                    c &lt;- get</span
+	><br
+	 /></code
+      ></pre
+    ></body
   ></html
 >
 

@@ -16,8 +16,8 @@ you can simply type
 to install it.
 
 
-use
----
+learn
+-----
 
 The [tutorial] introduction explains how to use the interface of the
 library for explicit sharing.
