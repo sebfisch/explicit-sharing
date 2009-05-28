@@ -48,12 +48,52 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
   blockquote { font-size: 90%; font-style: italic; }
 
   .nodisplay { display: none; }
+
+  #toc a { font-weight: bold; text-decoration: none; color: wheat; }
+
+  h1 a, h2 a { text-decoration: none; color: wheat; }
 </style>
 </head
   ><body
   ><h1 class="title"
     >how to use explicit sharing</h1
-    ><p
+    ><div id="toc"
+    ><ul
+      ><li
+	><a href="#sharing-io-effects" id="TOC-sharing-io-effects"
+	  >sharing IO effects</a
+	  ></li
+	><li
+	><a href="#nested-monadic-data" id="TOC-nested-monadic-data"
+	  >nested monadic data</a
+	  ></li
+	><li
+	><a href="#outlook" id="TOC-outlook"
+	  >outlook</a
+	  ></li
+	></ul
+      ></div
+    ><div class="nodisplay">
+<pre class="sourceCode haskell"
+    ><code
+      ><span class="Comment"
+	>{-# LANGUAGE PackageImports #-}</span
+	><br
+	 /><span class="Keyword"
+	>import</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="String"
+	>&quot;mtl&quot;</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal ModuleName"
+	>Control.Monad.Trans</span
+	><br
+	 /></code
+      ></pre
+    ></div>
+<p
     >This <a href="tutorial.lhs"
       >literate program</a
       > explains how to use the <a href="index.htm"
@@ -114,7 +154,9 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
       >share</code
       > yields something like the original action which can be duplicated without duplicating the effects.</p
     ><h2 id="sharing-io-effects"
-    >sharing IO effects</h2
+    ><a href="#TOC-sharing-io-effects"
+      >sharing IO effects</a
+      ></h2
     ><p
     >Let's look at an example. First consider a program that does not use explicit sharing.</p
     ><pre class="sourceCode haskell"
@@ -187,9 +229,7 @@ xyz
       >share</code
       > combinator provides a different kind of sharing. An IO action that is shared explicitly using <code
       >share</code
-      > can still be executed multiple times but its effects are only performed on first execution and an explicitly shared action will return the same result whenever it is executed. Moreover, if the result of explicitly sharing an action is never executed then the action provided to <code
-      >share</code
-      > is also never executed.</p
+      > can still be executed multiple times but its effects are only performed on first execution and an explicitly shared action will return the same result whenever it is executed.</p
     ><p
     >Here is a variant of the above action with explicit sharing.</p
     ><pre class="sourceCode haskell"
@@ -221,8 +261,356 @@ xyz
 	 /><span class="Normal NormalText"
 	>                    c &lt;- get</span
 	><br
+	 /><span class="Normal NormalText"
+	>                    </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> [a,b,c]</span
+	><br
 	 /></code
       ></pre
+    ><p
+    >Instead of the built-in <code
+      >let</code
+      > construct this action uses the <code
+      >share</code
+      > combinator to share the (now lifted) <code
+      >getChar</code
+      > action. We need to lift the <code
+      >getChar</code
+      > action because we cannot execute <code
+      >dup_shaed_get</code
+      > directly in the IO monad which does not support the <code
+      >share</code
+      > combinator.</p
+    ><p
+    >We can run this action using the operation <code
+      >evalLazy</code
+      >.</p
+    ><pre
+    ><code
+      >*Main&gt; evalLazy dup_shared_get :: IO String
+xyz
+&quot;xxx&quot;
+</code
+      ></pre
+    ><p
+    >This time, the result is <code
+      >&quot;xxx&quot;</code
+      > rather than <code
+      >&quot;xyz&quot;</code
+      >. The shared <code
+      >get</code
+      > action only performs the effects of <code
+      >getChar</code
+      > once and yields the result of the first execution at each duplicated occurrence. The remaining characters (<code
+      >&quot;yz&quot;</code
+      > in the example call above) are never read.</p
+    ><p
+    >This behaviour may seem as if <code
+      >share</code
+      > simply executes the given action and returns an action that yields the obtained result. It does not. The action given to <code
+      >share</code
+      > is only executed if the action that <code
+      >share</code
+      > returns is, i.e., <code
+      >share</code
+      > is lazy:</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>ignore_shared ::</span
+	><span class="Normal NormalText"
+	> (MonadIO m, Sharing m) =&gt; m </span
+	><span class="DataType TypeConstructor"
+	>String</span
+	><br
+	 /><span class="Normal NormalText"
+	>ignore_shared =</span
+	><br
+	 /><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> action &lt;- share (liftIO (</span
+	><span class="Function"
+	>error</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="String"
+	>&quot;don't touch me!&quot;</span
+	><span class="Normal NormalText"
+	> :: </span
+	><span class="DataType TypeConstructor"
+	>IO</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="DataType TypeConstructor"
+	>String</span
+	><span class="Normal NormalText"
+	>))</span
+	><br
+	 /><span class="Normal NormalText"
+	>    </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="String"
+	>&quot;didn't touch you.&quot;</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >Running <code
+      >ignore_shared</code
+      > yields <code
+      >&quot;didn't touch you.&quot;</code
+      > without touching the <code
+      >error</code
+      > call:</p
+    ><pre
+    ><code
+      >*Main&gt; evalLazy ignore_shared :: IO String
+&quot;didn't touch you.&quot;
+</code
+      ></pre
+    ><h2 id="nested-monadic-data"
+    ><a href="#TOC-nested-monadic-data"
+      >nested monadic data</a
+      ></h2
+    ><p
+    >Let's return to the type class <code
+      >Trans</code
+      > that specifies what data can be shared. The <code
+      >share</code
+      > combinator is not only applicable to predefined Haskell types like <code
+      >String</code
+      > but also to user-defined types that contain nested monadic components. For example, the library for explicit sharing defines a type for lists with monadic heads and tails.</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Keyword"
+	>data</span
+	><span class="Normal NormalText"
+	> List m a = Nil | Cons (m a) (m (List m a))</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >In order to be able to use <code
+      >share</code
+      > with values of this type, we need an instance of <code
+      >Trans</code
+      > (which is also provided out of the box).</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Keyword"
+	>instance</span
+	><span class="Normal NormalText"
+	> (</span
+	><span class="Keyword Class"
+	>Monad</span
+	><span class="Normal NormalText"
+	> m, Trans m a b) =&gt; Trans m (List m a) (List m b)</span
+	><br
+	 /><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>where</span
+	><br
+	 /><span class="Normal NormalText"
+	>  trans _ Nil         = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> Nil</span
+	><br
+	 /><span class="Normal NormalText"
+	>  trans f (Cons x xs) = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> Cons </span
+	><span class="Others InfixOperator"
+	>`ap`</span
+	><span class="Normal NormalText"
+	> f x </span
+	><span class="Others InfixOperator"
+	>`ap`</span
+	><span class="Normal NormalText"
+	> f xs</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >The type class <code
+      >Trans</code
+      > defines one operation <code
+      >trans</code
+      > to generically traverse nested monadic types. As you can see in the above instance declaration, the given function <code
+      >f</code
+      > is applied to every monadic child of a compound value and the results are combined using the matched constructor.</p
+    ><p
+    >The <code
+      >share</code
+      > combinator uses this functionality to share nested monadic components of data recursively. Here is an example that shares an infinite <code
+      >List</code
+      > of <code
+      >getChar</code
+      > operations and returns a list of some of them that are duplicated.</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>share_list ::</span
+	><span class="Normal NormalText"
+	> (MonadIO m, Sharing m) =&gt; m (List m </span
+	><span class="DataType TypeConstructor"
+	>Char</span
+	><span class="Normal NormalText"
+	>)</span
+	><br
+	 /><span class="Normal NormalText"
+	>share_list = </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> gets &lt;- share getChars</span
+	><br
+	 /><span class="Normal NormalText"
+	>                Cons a </span
+	><span class="Keyword"
+	>as</span
+	><span class="Normal NormalText"
+	> &lt;- gets</span
+	><br
+	 /><span class="Normal NormalText"
+	>                Cons b bs &lt;- </span
+	><span class="Keyword"
+	>as</span
+	><br
+	 /><span class="Normal NormalText"
+	>                Cons c cs &lt;- gets</span
+	><br
+	 /><span class="Normal NormalText"
+	>                cons a (cons b (cons c (cons a (cons b (cons c nil)))))</span
+	><br
+	 /><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>where</span
+	><br
+	 /><span class="Normal NormalText"
+	>  getChars = cons (liftIO </span
+	><span class="Function"
+	>getChar</span
+	><span class="Normal NormalText"
+	>) getChars</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >The functions <code
+      >nil</code
+      > and <code
+      >cons</code
+      > are helper functions to construct nested monadic lists. This example is definitely contrived but it helps to make a point: the infine list <code
+      >gets</code
+      > is shared and hence all contained actions are shared too. Hence, <code
+      >a</code
+      > and <code
+      >as</code
+      > are the same as <code
+      >c</code
+      > and <code
+      >cs</code
+      > and all actions yield the same results when duplicated. The result of <code
+      >share_list</code
+      > is a list with six elements that will read two characters from the standard input when executed.</p
+    ><p
+    >How can we observe this list? The <code
+      >List</code
+      > type comes with another instance of <code
+      >Trans</code
+      > that allows <code
+      >evalLazy</code
+      > to convert it to ordinary Haskell lists.</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Keyword"
+	>instance</span
+	><span class="Normal NormalText"
+	> (</span
+	><span class="Keyword Class"
+	>Monad</span
+	><span class="Normal NormalText"
+	> m, Trans m a b) =&gt; Trans m (List m a) [b]</span
+	><br
+	 /><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>where</span
+	><br
+	 /><span class="Normal NormalText"
+	>  trans _ Nil         = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> []</span
+	><br
+	 /><span class="Normal NormalText"
+	>  trans f (Cons x xs) = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> (:) </span
+	><span class="Others InfixOperator"
+	>`ap`</span
+	><span class="Normal NormalText"
+	> join (f x) </span
+	><span class="Others InfixOperator"
+	>`ap`</span
+	><span class="Normal NormalText"
+	> join (f xs)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >This instance lifts all nested monadic effects to the top-level such that a corresponding transformation yields an ordinary list without any nested effects.</p
+    ><p
+    >Now we can observe that indeed only two characters are read:</p
+    ><pre
+    ><code
+      >*Main&gt; evalLazy share_list :: IO String
+xyz
+&quot;xyxxyx&quot;
+</code
+      ></pre
+    ><h2 id="outlook"
+    ><a href="#TOC-outlook"
+      >outlook</a
+      ></h2
+    ><p
+    >Now, we have seen it all: the <code
+      >share</code
+      > combinator from the type class <code
+      >Sharing</code
+      > which implements explicit sharing of monadic effects such that monadic actions can be duplicated without duplicating their effects and two different instances of the type class <code
+      >Trans</code
+      > which allow nested monadic data to be shared and converted into ordinary data respectively. But what is this good for?</p
+    ><p
+    >A monadic effect whose interaction whith sharing is particularly interesting ins non-determinism. By combining the features for non-determinism provided by the <code
+      >MonadPlus</code
+      > type class with explicit sharing provided by the <code
+      >Sharing</code
+      > class we can implement lazy functional-logic programming as advocated, e.g., by the <a href="http://curry-language.org"
+      >Curry</a
+      > language in pure Haskell.</p
+    ><p
+    ><a href="flp.html"
+      >How to translate Curry programs to Haskell using explicit sharing</a
+      > is worth a different tutorial.</p
     ></body
   ></html
 >

@@ -64,9 +64,7 @@ The `share` combinator provides a different kind of sharing. An IO
 action that is shared explicitly using `share` can still be executed
 multiple times but its effects are only performed on first execution
 and an explicitly shared action will return the same result whenever
-it is executed. Moreover, if the result of explicitly sharing an
-action is never executed then the action provided to `share` is also
-never executed.
+it is executed.
 
 Here is a variant of the above action with explicit sharing.
 
@@ -77,7 +75,137 @@ Here is a variant of the above action with explicit sharing.
 >                     c <- get
 >                     return [a,b,c]
 
+Instead of the built-in `let` construct this action uses the `share`
+combinator to share the (now lifted) `getChar` action. We need to lift
+the `getChar` action because we cannot execute `dup_shaed_get`
+directly in the IO monad which does not support the `share`
+combinator.
+
+We can run this action using the operation `evalLazy`.
+
+    *Main> evalLazy dup_shared_get :: IO String
+    xyz
+    "xxx"
+
+This time, the result is `"xxx"` rather than `"xyz"`. The shared `get`
+action only performs the effects of `getChar` once and yields the
+result of the first execution at each duplicated occurrence. The
+remaining characters (`"yz"` in the example call above) are never
+read.
+
+This behaviour may seem as if `share` simply executes the given action
+and returns an action that yields the obtained result. It does
+not. The action given to `share` is only executed if the action that
+`share` returns is, i.e., `share` is lazy:
+
+> ignore_shared :: (MonadIO m, Sharing m) => m String
+> ignore_shared =
+>  do action <- share (liftIO (error "don't touch me!" :: IO String))
+>     return "didn't touch you."
+
+Running `ignore_shared` yields `"didn't touch you."` without touching
+the `error` call:
+
+    *Main> evalLazy ignore_shared :: IO String
+    "didn't touch you."
+
+
+nested monadic data
+-------------------
+
+Let's return to the type class `Trans` that specifies what data can be
+shared. The `share` combinator is not only applicable to predefined
+Haskell types like `String` but also to user-defined types that
+contain nested monadic components. For example, the library for
+explicit sharing defines a type for lists with monadic heads and
+tails.
+
+~~~ { .Haskell }
+data List m a = Nil | Cons (m a) (m (List m a))
+~~~
+
+In order to be able to use `share` with values of this type, we need
+an instance of `Trans` (which is also provided out of the box).
+
+~~~ { .Haskell }
+instance (Monad m, Trans m a b) => Trans m (List m a) (List m b)
+ where
+  trans _ Nil         = return Nil
+  trans f (Cons x xs) = return Cons `ap` f x `ap` f xs
+~~~
+
+The type class `Trans` defines one operation `trans` to generically
+traverse nested monadic types. As you can see in the above instance
+declaration, the given function `f` is applied to every monadic child
+of a compound value and the results are combined using the matched
+constructor.
+
+The `share` combinator uses this functionality to share nested monadic
+components of data recursively. Here is an example that shares an
+infinite `List` of `getChar` operations and returns a list of some of
+them that are duplicated.
+
+> share_list :: (MonadIO m, Sharing m) => m (List m Char)
+> share_list = do gets <- share getChars
+>                 Cons a as <- gets
+>                 Cons b bs <- as
+>                 Cons c cs <- gets
+>                 cons a (cons b (cons c (cons a (cons b (cons c nil)))))
+>  where
+>   getChars = cons (liftIO getChar) getChars
+
+The functions `nil` and `cons` are helper functions to construct
+nested monadic lists. This example is definitely contrived but it
+helps to make a point: the infine list `gets` is shared and hence all
+contained actions are shared too. Hence, `a` and `as` are the same as
+`c` and `cs` and all actions yield the same results when
+duplicated. The result of `share_list` is a list with six elements
+that will read two characters from the standard input when executed.
+
+How can we observe this list? The `List` type comes with another
+instance of `Trans` that allows `evalLazy` to convert it to ordinary
+Haskell lists.
+
+~~~ { .Haskell }
+instance (Monad m, Trans m a b) => Trans m (List m a) [b]
+ where
+  trans _ Nil         = return []
+  trans f (Cons x xs) = return (:) `ap` join (f x) `ap` join (f xs)
+~~~
+
+This instance lifts all nested monadic effects to the top-level such
+that a corresponding transformation yields an ordinary list without
+any nested effects.
+
+Now we can observe that indeed only two characters are read:
+
+    *Main> evalLazy share_list :: IO String
+    xyz
+    "xyxxyx"
+
+
+outlook
+-------
+
+Now, we have seen it all: the `share` combinator from the type class
+`Sharing` which implements explicit sharing of monadic effects such
+that monadic actions can be duplicated without duplicating their
+effects and two different instances of the type class `Trans` which
+allow nested monadic data to be shared and converted into ordinary
+data respectively. But what is this good for?
+
+A monadic effect whose interaction whith sharing is particularly
+interesting ins non-determinism. By combining the features for
+non-determinism provided by the `MonadPlus` type class with explicit
+sharing provided by the `Sharing` class we can implement lazy
+functional-logic programming as advocated, e.g., by the [Curry]
+language in pure Haskell.
+
+[How to translate Curry programs to Haskell using explicit
+sharing][FLP] is worth a different tutorial.
+
 [lhs]: tutorial.lhs
 [explicit-sharing]: index.htm
 [Typeclassopedia]: http://www.haskell.org/sitewiki/images/8/85/TMR-Issue13.pdf
-
+[Curry]: http://curry-language.org
+[FLP]: flp.html

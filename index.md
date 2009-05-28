@@ -19,9 +19,12 @@ to install it.
 learn
 -----
 
-The [tutorial] introduction explains how to use the interface of the
-library for explicit sharing.
+  * The [tutorial] introduction explains how to use the interface of
+    the library for explicit sharing.
 
+  * The application of this library to functional-logic programming
+    like advocated by the [Curry] language can be most easily grasped
+    [by example][FLP].
 
 contribute
 ----------
@@ -45,6 +48,8 @@ For questions or feedback contact [Sebastian Fischer].
 [cabal-install]: http://hackage.haskell.org/trac/hackage/wiki/CabalInstall
 
 [tutorial]: tutorial.html
+[Curry]: http://curry-language.org
+[FLP]: flp.html
 
 [GitHub]: http://github.com/sebfisch/explicit-sharing
 [issues]: http://github.com/sebfisch/explicit-sharing/issues
