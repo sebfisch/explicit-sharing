@@ -1,7 +1,9 @@
 .PHONY: all
 
-all: index.html
+all: index.htm tutorial.html
 
-%.html: %.md
+%.htm: %.md
 	pandoc --standalone --css=style.css --output=$@ $<
 
+%.html: %.lhs lhs.style
+	pandoc --standalone --include-in-header=lhs.style --output=$@ $<
