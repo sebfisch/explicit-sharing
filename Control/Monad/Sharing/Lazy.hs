@@ -25,6 +25,7 @@ module Control.Monad.Sharing.Lazy (
 
  ) where
 
+import Control.Monad.Trans
 import Control.Monad.Sharing
 
 -- For fast and easy implementation of typed stores..
@@ -71,6 +72,16 @@ instance MonadPlus m => MonadPlus (Lazy m)
   mzero       = Lazy (\_ _ -> mzero)
   a `mplus` b = Lazy (\c s -> fromLazy a c s `mplus` fromLazy b c s)
 
+-- @Lazy@ is a monad transformer.
+instance MonadTrans Lazy
+ where
+  lift a = Lazy (\c s -> a >>= \x -> c x s)
+
+-- If the underlying monad supports IO we can lift this functionality.
+instance MonadIO m => MonadIO (Lazy m)
+ where
+  liftIO = lift . liftIO
+
 -- The @Sharing@ instance memoizes nested monadic values recursively.
 instance Monad m => Sharing (Lazy m)
  where
@@ -108,4 +119,3 @@ data Untyped = forall a . Untyped a
 
 typed :: Untyped -> a
 typed (Untyped x) = unsafeCoerce x
-
