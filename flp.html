@@ -2,10 +2,32 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 ><head
   ><title
-    ></title
+    >lazy FLP in pure Haskell</title
     ><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"
      /><meta name="generator" content="pandoc"
-     /><style type="text/css">
+     /><style type="text/css"
+    >
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode, table.sourceCode pre 
+   { margin: 0; padding: 0; border: 0; vertical-align: baseline; border: none; }
+td.lineNumbers { border-right: 1px solid #AAAAAA; text-align: right; color: #AAAAAA; padding-right: 5px; padding-left: 5px; }
+td.sourceCode { padding-left: 5px; }
+pre.sourceCode { }
+pre.sourceCode span.Normal { }
+pre.sourceCode span.Keyword { color: #007020; font-weight: bold; } 
+pre.sourceCode span.DataType { color: #902000; }
+pre.sourceCode span.DecVal { color: #40a070; }
+pre.sourceCode span.BaseN { color: #40a070; }
+pre.sourceCode span.Float { color: #40a070; }
+pre.sourceCode span.Char { color: #4070a0; }
+pre.sourceCode span.String { color: #4070a0; }
+pre.sourceCode span.Comment { color: #60a0b0; font-style: italic; }
+pre.sourceCode span.Others { color: #007020; }
+pre.sourceCode span.Alert { color: red; font-weight: bold; }
+pre.sourceCode span.Function { color: #06287e; }
+pre.sourceCode span.RegionMarker { }
+pre.sourceCode span.Error { color: red; font-weight: bold; }
+</style
+    ><style type="text/css">
   body { font-family: Optima, sans-serif; width: 40em; color: dimgray; }
 
   h1, h2 { color: wheat; }
@@ -33,7 +55,135 @@
 </style>
 </head
   ><body
-  ></body
+  ><h1 class="title"
+    >lazy FLP in pure Haskell</h1
+    ><div id="toc"
+    ><ul
+      ><li
+	><a href="#permutation-sort" id="TOC-permutation-sort"
+	  >permutation sort</a
+	  ></li
+	></ul
+      ></div
+    ><p
+    >This <a href="flp.lhs"
+      >literate program</a
+      > explains how to express programs written in the lazy functional-logic programming language <a href="http://curry-language.org"
+      >Curry</a
+      > in pure Haskell using the <a href="index.htm"
+      >explicit-sharing</a
+      > package. If you have not done so already you may want to read the <a href="tutorial.html"
+      >tutorial</a
+      > introduction to this package first.</p
+    ><h2 id="permutation-sort"
+    ><a href="#TOC-permutation-sort"
+      >permutation sort</a
+      ></h2
+    ><p
+    >Lazy functional-logic programming is tailor made for expressing demand driven search algorithms concisely. For example, we can express sorting as a demand driven search problem in Curry as follows.</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>sort ::</span
+	><span class="Normal NormalText"
+	> [</span
+	><span class="DataType TypeConstructor"
+	>Int</span
+	><span class="Normal NormalText"
+	>] -&gt; [</span
+	><span class="DataType TypeConstructor"
+	>Int</span
+	><span class="Normal NormalText"
+	>]</span
+	><br
+	 /><span class="Normal NormalText"
+	>sort l | isSorted p = p </span
+	><span class="Keyword"
+	>where</span
+	><span class="Normal NormalText"
+	> p = permute l</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >Sorting is usually not expressed as a search problem but let's not care for a moment and pretend we don't know better. Even if we don't know anything about sorting we can implement it using the above algorithm which reads: <em
+      >to sort a list, permute it such that it is sorted</em
+      >.</p
+    ><p
+    >Note that we have successfully split the task of sorting into two independent tasks that are easier to implement: how to permute a list and how to check whether a list is sorted.</p
+    ><p
+    >Lazy functional-logic programming provides the machinery to implement these tasks separately, yet execute them in a trickily interleaved way, such that the generating part (which permutes lists) produces values only to the extend demanded by the testing part (which checks whether a list is sorted).</p
+    ><p
+    >We can implement the tester and generator for the above sorting algorithm in Curry as follows.</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>isSorted ::</span
+	><span class="Normal NormalText"
+	> [</span
+	><span class="DataType TypeConstructor"
+	>Int</span
+	><span class="Normal NormalText"
+	>] -&gt; </span
+	><span class="DataType TypeConstructor"
+	>Bool</span
+	><br
+	 /><span class="Normal NormalText"
+	>isSorted []       = </span
+	><span class="Keyword DataConstructor"
+	>True</span
+	><br
+	 /><span class="Normal NormalText"
+	>isSorted [_]      = </span
+	><span class="Keyword DataConstructor"
+	>True</span
+	><br
+	 /><span class="Normal NormalText"
+	>isSorted (x:y:zs) = x &lt;= y &amp;&amp; isSorted (y:zs)</span
+	><br
+	 /><br
+	 /><span class="Function FunctionDefinition"
+	>permute ::</span
+	><span class="Normal NormalText"
+	> [a] -&gt; [a]</span
+	><br
+	 /><span class="Normal NormalText"
+	>permute []     = []</span
+	><br
+	 /><span class="Normal NormalText"
+	>permute (x:xs) = insert x (permute xs)</span
+	><br
+	 /><br
+	 /><span class="Function FunctionDefinition"
+	>insert ::</span
+	><span class="Normal NormalText"
+	> a -&gt; [a] -&gt; [a]</span
+	><br
+	 /><span class="Normal NormalText"
+	>insert x xs     = x : xs</span
+	><br
+	 /><span class="Normal NormalText"
+	>insert x (y:ys) = y : insert x ys</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >In Curry the rule of a function are not matched from top to bottom (picking the first) but tried non-deterministically. Hence, <code
+      >insert</code
+      > can yield different non-deterministic results when applied to a non-empty list and so can <code
+      >permute</code
+      >.</p
+    ><p
+    >A more interesting observation, however, is the following: the predicate <code
+      >isSorted</code
+      > yields <code
+      >False</code
+      > if it sees two adjacent elements that are out of order <em
+      >without demanding subsequent elements of the list</em
+      >. The function <code
+      >isSorted</code
+      > can reject a permutation based on the first two elements and if it does the permutations of the remaining elements need not be computed. This contributes greately to the efficiency of the presented sorting algorithm (which has nevertheless exponential run time).</p
+    ></body
   ></html
 >
 
