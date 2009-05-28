@@ -60,8 +60,12 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
     ><div id="toc"
     ><ul
       ><li
-	><a href="#permutation-sort" id="TOC-permutation-sort"
-	  >permutation sort</a
+	><a href="#lazy-permutation-sort-in-curry" id="TOC-lazy-permutation-sort-in-curry"
+	  >lazy permutation sort in Curry</a
+	  ></li
+	><li
+	><a href="#lazy-permutation-sort-in-haskell" id="TOC-lazy-permutation-sort-in-haskell"
+	  >lazy permutation sort in Haskell</a
 	  ></li
 	></ul
       ></div
@@ -75,9 +79,9 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
       > package. If you have not done so already you may want to read the <a href="tutorial.html"
       >tutorial</a
       > introduction to this package first.</p
-    ><h2 id="permutation-sort"
-    ><a href="#TOC-permutation-sort"
-      >permutation sort</a
+    ><h2 id="lazy-permutation-sort-in-curry"
+    ><a href="#TOC-lazy-permutation-sort-in-curry"
+      >lazy permutation sort in Curry</a
       ></h2
     ><p
     >Lazy functional-logic programming is tailor made for expressing demand driven search algorithms concisely. For example, we can express sorting as a demand driven search problem in Curry as follows.</p
@@ -183,6 +187,235 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
       >. The function <code
       >isSorted</code
       > can reject a permutation based on the first two elements and if it does the permutations of the remaining elements need not be computed. This contributes greately to the efficiency of the presented sorting algorithm (which has nevertheless exponential run time).</p
+    ><h2 id="lazy-permutation-sort-in-haskell"
+    ><a href="#TOC-lazy-permutation-sort-in-haskell"
+      >lazy permutation sort in Haskell</a
+      ></h2
+    ><p
+    >In order to model this algorithm in pure Haskell we can use the <code
+      >MonadPlus</code
+      > type class to express non-determinism. However, in order to maintain the laziness of the algorithm we need a data type for non-deterministic lists that can be computed on demand. More specifically, we need to be able to yield the first element of a list whose tail is yet to be computed non-deterministically.</p
+    ><p
+    >The <code
+      >List</code
+      > data type provided by this module</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Keyword"
+	>import</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal ModuleName"
+	>Control.Monad.Sharing.Lazy</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >provides lists with nested monadic components which is exactly what we need. All we have to do is translate the Curry functions above (which use implicit non-determinism and implicit sharing) into equivalent Haskell functions that use explicit non-determinism and explicit sharing. Here we go:</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>sort ::</span
+	><span class="Normal NormalText"
+	> (MonadPlus m, Sharing m) =&gt; m (List m </span
+	><span class="DataType TypeConstructor"
+	>Int</span
+	><span class="Normal NormalText"
+	>) -&gt; m (List m </span
+	><span class="DataType TypeConstructor"
+	>Int</span
+	><span class="Normal NormalText"
+	>)</span
+	><br
+	 /><span class="Normal NormalText"
+	>sort l = </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> p &lt;- share (permute =&lt;&lt; l)</span
+	><br
+	 /><span class="Normal NormalText"
+	>            </span
+	><span class="Keyword DataConstructor"
+	>True</span
+	><span class="Normal NormalText"
+	> &lt;- isSorted =&lt;&lt; p</span
+	><br
+	 /><span class="Normal NormalText"
+	>            p</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >The <code
+      >sort</code
+      > function uses the combinator <code
+      >share</code
+      > to obtain a non-deterministic permutation <code
+      >p</code
+      > of the list <code
+      >l</code
+      > which is used twice. Once as parameter to <code
+      >isSorted</code
+      >, once as the result of <code
+      >sort</code
+      >. The combinator <code
+      >share</code
+      > ensures that both occurrences of <code
+      >p</code
+      > evaluate to the same results but can still be demanded lazily, which is especially important for the first occurrence of <code
+      >p</code
+      >.</p
+    ><p
+    >The predicate <code
+      >isSorted</code
+      > checks whether a non-deterministic list is sorted and demands the given list only until it finds two elements out of order.</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>isSorted ::</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword Class"
+	>Monad</span
+	><span class="Normal NormalText"
+	> m =&gt; List m </span
+	><span class="DataType TypeConstructor"
+	>Int</span
+	><span class="Normal NormalText"
+	> -&gt; m </span
+	><span class="DataType TypeConstructor"
+	>Bool</span
+	><br
+	 /><span class="Normal NormalText"
+	>isSorted Nil           = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword DataConstructor"
+	>True</span
+	><br
+	 /><span class="Normal NormalText"
+	>isSorted (Cons mx mxs) = </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> xs &lt;- mxs</span
+	><br
+	 /><span class="Normal NormalText"
+	>                            </span
+	><span class="Keyword"
+	>case</span
+	><span class="Normal NormalText"
+	> xs </span
+	><span class="Keyword"
+	>of</span
+	><br
+	 /><span class="Normal NormalText"
+	>                              Nil         -&gt; </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword DataConstructor"
+	>True</span
+	><br
+	 /><span class="Normal NormalText"
+	>                              Cons my mys -&gt; </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> b &lt;- liftM2 (&lt;=) mx my</span
+	><br
+	 /><span class="Normal NormalText"
+	>                                                </span
+	><span class="Keyword"
+	>if</span
+	><span class="Normal NormalText"
+	> b </span
+	><span class="Keyword"
+	>then</span
+	><span class="Normal NormalText"
+	> isSorted =&lt;&lt; mxs</span
+	><br
+	 /><span class="Normal NormalText"
+	>                                                     </span
+	><span class="Keyword"
+	>else</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword DataConstructor"
+	>False</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >The functions <code
+      >permute</code
+      > and <code
+      >insert</code
+      > are non-deterministic:</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>permute ::</span
+	><span class="Normal NormalText"
+	> MonadPlus m =&gt; List m a -&gt; m (List m a)</span
+	><br
+	 /><span class="Normal NormalText"
+	>permute Nil           = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> Nil</span
+	><br
+	 /><span class="Normal NormalText"
+	>permute (Cons mx mxs) = insert mx (permute =&lt;&lt; mxs)</span
+	><br
+	 /><br
+	 /><span class="Function FunctionDefinition"
+	>insert ::</span
+	><span class="Normal NormalText"
+	> MonadPlus m =&gt; m a -&gt; m (List m a) -&gt; m (List m a)</span
+	><br
+	 /><span class="Normal NormalText"
+	>insert mx mxs = cons mx mxs</span
+	><br
+	 /><span class="Normal NormalText"
+	>        </span
+	><span class="Others InfixOperator"
+	>`mplus`</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> Cons my mys &lt;- mxs</span
+	><br
+	 /><span class="Normal NormalText"
+	>                   cons my (insert mx mys)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >We can now execute lazy permutation sort in Haskell.</p
+    ><pre
+    ><code
+      >*Main&gt; evalLazy (sort (eval [(10::Int),9..1])) :: [[Int]]
+[[1,2,3,4,5,6,7,8,9,10]]
+</code
+      ></pre
+    ><p
+    >The function <code
+      >evalLazy</code
+      > runs the computation in a lazy monad with explicit sharing and converts nested non-deterministic lists to ordinary lists. The function <code
+      >eval</code
+      > converts in the other direction.</p
     ></body
   ></html
 >

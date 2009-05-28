@@ -183,6 +183,23 @@ Now we can observe that indeed only two characters are read:
     xyz
     "xyxxyx"
 
+In order to convert in the other direction, there is yet another
+instance of `Trans` for `List`s:
+
+~~~ { .Haskell }
+instance (Monad m, Trans m a b) => Trans m [a] (List m b)
+ where
+  trans _ []     = return Nil
+  trans f (x:xs) = return Cons `ap` f (return x) `ap` f (return xs)
+~~~
+
+Thanks to this instance, we could use the function
+
+~~~ { .Haskell }
+eval :: (Monad m, Trans m a b) => a -> m b
+~~~
+
+to convert a list of type `[Char]` into one of type `m (List m Char)`.
 
 outlook
 -------
@@ -190,9 +207,9 @@ outlook
 Now, we have seen it all: the `share` combinator from the type class
 `Sharing` which implements explicit sharing of monadic effects such
 that monadic actions can be duplicated without duplicating their
-effects and two different instances of the type class `Trans` which
-allow nested monadic data to be shared and converted into ordinary
-data respectively. But what is this good for?
+effects and three different instances of the type class `Trans` which
+allow nested monadic data to be shared and converted back and forth to
+ordinary data respectively. But what is this good for?
 
 A monadic effect whose interaction whith sharing is particularly
 interesting ins non-determinism. By combining the features for

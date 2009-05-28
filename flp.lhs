@@ -88,8 +88,52 @@ use implicit non-determinism and implicit sharing) into equivalent
 Haskell functions that use explicit non-determinism and explicit
 sharing. Here we go:
 
- sort :: (MonadPlus m, Sharing m) => m (List m a)
+> sort :: (MonadPlus m, Sharing m) => m (List m Int) -> m (List m Int)
+> sort l = do p <- share (permute =<< l)
+>             True <- isSorted =<< p
+>             p
 
+The `sort` function uses the combinator `share` to obtain a
+non-deterministic permutation `p` of the list `l` which is used
+twice. Once as parameter to `isSorted`, once as the result of
+`sort`. The combinator `share` ensures that both occurrences of `p`
+evaluate to the same results but can still be demanded lazily, which
+is especially important for the first occurrence of `p`.
+
+The predicate `isSorted` checks whether a non-deterministic list is
+sorted and demands the given list only until it finds two elements out
+of order.
+
+> isSorted :: Monad m => List m Int -> m Bool
+> isSorted Nil           = return True
+> isSorted (Cons mx mxs) = do xs <- mxs
+>                             case xs of
+>                               Nil         -> return True
+>                               Cons my mys -> do b <- liftM2 (<=) mx my
+>                                                 if b then isSorted =<< mxs
+>                                                      else return False
+
+The functions `permute` and `insert` are non-deterministic:
+
+> permute :: MonadPlus m => List m a -> m (List m a)
+> permute Nil           = return Nil
+> permute (Cons mx mxs) = insert mx (permute =<< mxs)
+>
+> insert :: MonadPlus m => m a -> m (List m a) -> m (List m a)
+> insert mx mxs = cons mx mxs
+>         `mplus` do Cons my mys <- mxs
+>                    cons my (insert mx mys)
+
+We can now execute lazy permutation sort in Haskell.
+
+    *Main> evalLazy (sort (eval [(10::Int),9..1])) :: [[Int]]
+    [[1,2,3,4,5,6,7,8,9,10]]
+
+The function `evalLazy` runs the computation in a lazy monad with
+explicit sharing and converts nested non-deterministic lists to
+ordinary lists. The function `eval` converts in the other direction.
+
+TODO: non-deterministic higher-order functions
 
 [lhs]: flp.lhs
 [Curry]: http://curry-language.org

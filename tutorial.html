@@ -587,6 +587,81 @@ xyz
 &quot;xyxxyx&quot;
 </code
       ></pre
+    ><p
+    >In order to convert in the other direction, there is yet another instance of <code
+      >Trans</code
+      > for <code
+      >List</code
+      >s:</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Keyword"
+	>instance</span
+	><span class="Normal NormalText"
+	> (</span
+	><span class="Keyword Class"
+	>Monad</span
+	><span class="Normal NormalText"
+	> m, Trans m a b) =&gt; Trans m [a] (List m b)</span
+	><br
+	 /><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>where</span
+	><br
+	 /><span class="Normal NormalText"
+	>  trans _ []     = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> Nil</span
+	><br
+	 /><span class="Normal NormalText"
+	>  trans f (x:xs) = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> Cons </span
+	><span class="Others InfixOperator"
+	>`ap`</span
+	><span class="Normal NormalText"
+	> f (</span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> x) </span
+	><span class="Others InfixOperator"
+	>`ap`</span
+	><span class="Normal NormalText"
+	> f (</span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> xs)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >Thanks to this instance, we could use the function</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>eval ::</span
+	><span class="Normal NormalText"
+	> (</span
+	><span class="Keyword Class"
+	>Monad</span
+	><span class="Normal NormalText"
+	> m, Trans m a b) =&gt; a -&gt; m b</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >to convert a list of type <code
+      >[Char]</code
+      > into one of type <code
+      >m (List m Char)</code
+      >.</p
     ><h2 id="outlook"
     ><a href="#TOC-outlook"
       >outlook</a
@@ -596,9 +671,9 @@ xyz
       >share</code
       > combinator from the type class <code
       >Sharing</code
-      > which implements explicit sharing of monadic effects such that monadic actions can be duplicated without duplicating their effects and two different instances of the type class <code
+      > which implements explicit sharing of monadic effects such that monadic actions can be duplicated without duplicating their effects and three different instances of the type class <code
       >Trans</code
-      > which allow nested monadic data to be shared and converted into ordinary data respectively. But what is this good for?</p
+      > which allow nested monadic data to be shared and converted back and forth to ordinary data respectively. But what is this good for?</p
     ><p
     >A monadic effect whose interaction whith sharing is particularly interesting ins non-determinism. By combining the features for non-determinism provided by the <code
       >MonadPlus</code
