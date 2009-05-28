@@ -153,3 +153,8 @@ instance (Monad m, Trans m a b) => Trans m (List m a) [b]
  where
   trans _ Nil         = return []
   trans f (Cons x xs) = return (:) `ap` join (f x) `ap` join (f xs)
+
+instance (Monad m, Trans m a b) => Trans m [a] (List m b)
+ where
+  trans _ []     = return Nil
+  trans f (x:xs) = return Cons `ap` f (return x) `ap` f (return xs)
