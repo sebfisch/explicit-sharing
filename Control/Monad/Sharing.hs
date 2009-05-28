@@ -84,6 +84,26 @@ instance Monad m => Trans m Double Double
  where
   trans _ = return
 
+instance Monad m => Trans m [Bool] [Bool]
+ where
+  trans _ = return
+
+instance Monad m => Trans m [Int] [Int]
+ where
+  trans _ = return
+
+instance Monad m => Trans m [Char] [Char]
+ where
+  trans _ = return
+
+instance Monad m => Trans m [Float] [Float]
+ where
+  trans _ = return
+
+instance Monad m => Trans m [Double] [Double]
+ where
+  trans _ = return
+
 -- | An instance for lists with monadic elements.
 instance (Monad m, Trans m a a) => Trans m [m a] [m a]
  where
