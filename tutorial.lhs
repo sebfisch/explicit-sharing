@@ -193,7 +193,7 @@ instance (Monad m, Trans m a b) => Trans m [a] (List m b)
   trans f (x:xs) = return Cons `ap` f (return x) `ap` f (return xs)
 ~~~
 
-Thanks to this instance, we could use the function
+Thanks to this instance, we can use the function
 
 ~~~ { .Haskell }
 eval :: (Monad m, Trans m a b) => a -> m b

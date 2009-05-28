@@ -53,7 +53,7 @@ insert x xs     = x : xs
 insert x (y:ys) = y : insert x ys
 ~~~
 
-In Curry the rule of a function are not matched from top to bottom
+In Curry the rules of a function are not matched from top to bottom
 (picking the first) but tried non-deterministically. Hence, `insert`
 can yield different non-deterministic results when applied to a
 non-empty list and so can `permute`.
@@ -97,7 +97,7 @@ The `sort` function uses the combinator `share` to obtain a
 non-deterministic permutation `p` of the list `l` which is used
 twice. Once as parameter to `isSorted`, once as the result of
 `sort`. The combinator `share` ensures that both occurrences of `p`
-evaluate to the same results but can still be demanded lazily, which
+evaluate to the same result but can still be demanded lazily, which
 is especially important for the first occurrence of `p`.
 
 The predicate `isSorted` checks whether a non-deterministic list is
