@@ -90,6 +90,13 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
 	><span class="Normal ModuleName"
 	>Control.Monad.Trans</span
 	><br
+	 /><span class="Keyword"
+	>import</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal ModuleName"
+	>Data.Monadic.List</span
+	><br
 	 /></code
       ></pre
     ></div>
@@ -106,7 +113,7 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
 	><span class="Normal NormalText"
 	> </span
 	><span class="Normal ModuleName"
-	>Control.Monad.Sharing.Lazy</span
+	>Control.Monad.Sharing</span
 	><br
 	 /></code
       ></pre
@@ -388,7 +395,9 @@ xyz
       >share</code
       > combinator is not only applicable to predefined Haskell types like <code
       >String</code
-      > but also to user-defined types that contain nested monadic components. For example, the library for explicit sharing defines a type for lists with monadic heads and tails.</p
+      > but also to user-defined types that contain nested monadic components. For example, the module <code
+      >Data.Monadic.List</code
+      > defines a type for lists with monadic heads and tails.</p
     ><pre class="sourceCode Haskell"
     ><code
       ><span class="Keyword"

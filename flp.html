@@ -194,7 +194,20 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
     ><p
     >In order to model this algorithm in pure Haskell we can use the <code
       >MonadPlus</code
-      > type class to express non-determinism. However, in order to maintain the laziness of the algorithm we need a data type for non-deterministic lists that can be computed on demand. More specifically, we need to be able to yield the first element of a list whose tail is yet to be computed non-deterministically.</p
+      > type class to express non-determinism and the module</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Keyword"
+	>import</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal ModuleName"
+	>Control.Monad.Sharing</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >for explicit sharing. However, in order to maintain the laziness of the algorithm we need a data type for non-deterministic lists that can be computed on demand. More specifically, we need to be able to yield the first element of a list whose tail is yet to be computed non-deterministically.</p
     ><p
     >The <code
       >List</code
@@ -206,12 +219,12 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
 	><span class="Normal NormalText"
 	> </span
 	><span class="Normal ModuleName"
-	>Control.Monad.Sharing.Lazy</span
+	>Data.Monadic.List</span
 	><br
 	 /></code
       ></pre
     ><p
-    >provides lists with nested monadic components which is exactly what we need. All we have to do is translate the Curry functions above (which use implicit non-determinism and implicit sharing) into equivalent Haskell functions that use explicit non-determinism and explicit sharing. Here we go:</p
+    >has nested monadic components which is exactly what we need. All we have to do is translate the Curry functions above (which use implicit non-determinism and implicit sharing) into equivalent Haskell functions that use explicit non-determinism and explicit sharing. Here we go:</p
     ><pre class="sourceCode haskell"
     ><code
       ><span class="Function FunctionDefinition"
