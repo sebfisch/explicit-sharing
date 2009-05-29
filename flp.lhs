@@ -137,8 +137,6 @@ The function `evalLazy` runs the computation in a lazy monad with
 explicit sharing and converts nested non-deterministic lists to
 ordinary lists. The function `eval` converts in the other direction.
 
-TODO: non-deterministic higher-order functions
-
 [lhs]: flp.lhs
 [Curry]: http://curry-language.org
 [explicit-sharing]: index.html
