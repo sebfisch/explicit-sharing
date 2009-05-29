@@ -17,7 +17,7 @@ import System ( getArgs )
 
 main = do
   n <- liftM (read.head) getArgs
-  let result = evalLazy . sort . eval $ [(1::Int)..n]
+  let result = evalLazy . sort . convert $ [(1::Int)..n]
   mapM_ print (result :: [[Int]])
 
 

@@ -16,8 +16,8 @@ module Data.Monadic.List (
 
  ) where
 
-import Control.Monad                 ( MonadPlus, ap, join )
-import Control.Monad.Sharing.Classes ( Trans(..) )
+import Control.Monad                 ( MonadPlus, ap )
+import Control.Monad.Sharing.Classes ( Shareable(..), Convertible(..) )
 
 -- | Data type for lists where both the head and tail are monadic.
 data List m a = Nil | Cons (m a) (m (List m a))
@@ -52,23 +52,23 @@ rest ml = do Cons _ xs <- ml; xs
 -- |
 -- This instance allows to use nested monadic lists as argument to the
 -- 'Control.Monad.Sharing.share' combinator.
-instance (Monad m, Trans m a b) => Trans m (List m a) (List m b)
+instance (Monad m, Shareable m a) => Shareable m (List m a)
  where
-  trans _ Nil         = return Nil
-  trans f (Cons x xs) = return Cons `ap` f x `ap` f xs
+  shareArgs _ Nil         = return Nil
+  shareArgs f (Cons x xs) = return Cons `ap` f x `ap` f xs
 
 -- |
--- This instance enables the function 'Control.Monad.Sharing.eval' to
--- transform nested monadic lists into ordinary Haskell lists.
-instance (Monad m, Trans m a b) => Trans m (List m a) [b]
+-- This instance enables the function 'Control.Monad.Sharing.convert'
+-- to transform ordinary Haskell lists into nested monadic lists.
+instance (Monad m, Convertible m a b) => Convertible m [a] (List m b)
  where
-  trans _ Nil         = return []
-  trans f (Cons x xs) = return (:) `ap` join (f x) `ap` join (f xs)
+  convArgs _ []     = return Nil
+  convArgs f (x:xs) = return (Cons (f x) (f xs))
 
 -- |
--- This instance enables the function 'Control.Monad.Sharing.eval' to
--- transform ordinary Haskell lists into nested monadic lists.
-instance (Monad m, Trans m a b) => Trans m [a] (List m b)
+-- This instance enables the function 'Control.Monad.Sharing.convert'
+-- to transform nested monadic lists into ordinary Haskell lists.
+instance (Monad m, Convertible m a b) => Convertible m (List m a) [b]
  where
-  trans _ []     = return Nil
-  trans f (x:xs) = return Cons `ap` f (return x) `ap` f (return xs)
+  convArgs _ Nil         = return []
+  convArgs f (Cons x xs) = return (:) `ap` (x >>= f) `ap` (xs >>= f)

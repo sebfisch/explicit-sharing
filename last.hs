@@ -5,10 +5,10 @@
 
 -- $ time ./last 1000000 +RTS -H1000M -K20M
 -- True
--- user	0m4.264s
+-- user	0m2.760s
 -- $ time ./last 10000000 +RTS -H1000M -K20M
 -- True
--- user	0m49.657s
+-- user	0m24.483s
 
 -- $ time ./last.mcc 1000000 +RTS -h1000m -k20m
 -- 1000000
@@ -24,7 +24,7 @@ import Prelude hiding ( last )
 
 main =
  do n <- liftM (read.head) getArgs
-    let result = evalLazy . last . eval $ replicate n True
+    let result = evalLazy . last . convert $ replicate n True
     mapM_ print (result :: [Bool])
 
 last :: (MonadPlus m, Sharing m) => m (List m Bool) -> m Bool

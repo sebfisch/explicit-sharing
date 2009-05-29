@@ -1,5 +1,5 @@
 Name:          explicit-sharing
-Version:       0.4.0.1
+Version:       0.5.0
 Cabal-Version: >= 1.6
 Synopsis:      Explicit Sharing of Monadic Effects
 Description:   
@@ -12,6 +12,7 @@ License:       PublicDomain
 License-File:  LICENSE
 Author:        Chung-chieh Shan, Oleg Kiselyov, and Sebastian Fischer
 Maintainer:    sebf@informatik.uni-kiel.de
+Homepage:      http://sebfisch.github.com/explicit-sharing
 Bug-Reports:   http://github.com/sebfisch/explicit-sharing/issues
 Build-Type:    Custom
 Stability:     experimental
@@ -22,11 +23,14 @@ Library
   Build-Depends:    base, containers ==0.2.0.0, mtl
   Exposed-Modules:  Control.Monad.Sharing,
                     Control.Monad.Sharing.Classes,
+                    Control.Monad.Sharing.FirstOrder,
                     Data.Monadic.List
-  Other-Modules:    Control.Monad.Sharing.Implementation.CPS
+  Other-Modules:    Control.Monad.Sharing.Implementation.CPS,
+                    Control.Monad.Sharing.Implementation.FirstOrder
   Ghc-Options:      -Wall
   Extensions:       ExistentialQuantification,
                     MultiParamTypeClasses,
                     FlexibleInstances,
                     FlexibleContexts,
+                    RelaxedPolyRec,
                     Rank2Types

@@ -22,23 +22,32 @@ main = do
           , dup_dup, dup_two_coins, dup_head, dup_head_lazy
           ]
 
-instance Monad m => Trans m (Int,Int) (Int,Int)
+instance Monad m => Shareable m (Int,Int)
  where
-  trans _ = return
+  shareArgs _ = return
 
--- instance (Trans m a a, Trans m b b) => Trans m (m a,m b) (m a,m b)
---  where
---   trans f (a,b) = return (,) `ap` f a `ap` f b
-
-instance Monad m => Trans m (m Int, m Int) (m Int, m Int)
+instance Monad m => Shareable m ([Int],[Int])
  where
-  trans f (a,b) = return (,) `ap` f a `ap` f b
+  shareArgs _ = return
 
-instance (Monad m, Trans m a c, Trans m b d) => Trans m (m a,m b) (c,d)
+instance Monad m => Shareable m ((Int,Int),(Int,Int))
  where
-  trans f (a,b) = return (,) `ap` join (f a) `ap` join (f b)
+  shareArgs _ = return
 
-assertEqual :: (Trans (Lazy []) a b, Eq b) => [b] -> Lazy [] a -> Bool
+instance Monad m => Convertible m (Int,Int) (Int,Int)
+ where
+  convArgs _ = return
+
+instance (Monad m, Shareable m a) => Shareable m (m a, m a)
+ where
+  shareArgs f (x,y) = return (,) `ap` f x `ap` f y
+
+instance (Monad m, Convertible m a b) => Convertible m (m a, m a) (b, b)
+ where
+  convArgs f (x,y) = return (,) `ap` (x >>= f) `ap` (y >>= f)
+
+assertEqual :: (Shareable (Lazy []) a, Convertible (Lazy []) a b, Eq b)
+            => [b] -> Lazy [] a -> Bool
 assertEqual res test = zipEq (evalLazy test) res
  where
   zipEq [] [] = True
@@ -100,7 +109,7 @@ two_coins = assertEqual [(0,0),(0::Int,1::Int),(1,0),(1,1)] $
 
 dup_coin = assertEqual [(0::Int,0::Int),(1,1)] $ dup coin
 
-dup :: (Monad m, Sharing m, Trans m a a) => m a -> m (m a, m a)
+dup :: (Monad m, Sharing m, Shareable m a) => m a -> m (m a, m a)
 dup a = do
   x <- share a
   return (x,x)
