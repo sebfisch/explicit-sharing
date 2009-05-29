@@ -6,8 +6,8 @@
 
 {-# OPTIONS -fno-warn-name-shadowing #-}
 
--- | Module      : Control.Monad.Sharing.Lazy
--- | Copyright   : Sebastian Fischer
+-- | Module      : Control.Monad.Sharing.Implementation.CPS
+-- | Copyright   : Chung-chieh Shan, Oleg Kiselyov, and Sebastian Fischer
 -- | License     : PublicDomain
 -- |
 -- | Maintainer  : Sebastian Fischer (sebf@informatik.uni-kiel.de)
@@ -17,16 +17,15 @@
 -- | implemented by a combination of a continuation- with a reader
 -- | monad. The definitions are inlined and hand-optimized to increase
 -- | performance.
-module Control.Monad.Sharing.Lazy (
-
-  module Control.Monad.Sharing,
+module Control.Monad.Sharing.Implementation.CPS (
 
   Lazy, evalLazy
 
  ) where
 
-import Control.Monad.Trans
-import Control.Monad.Sharing
+import Control.Monad                 ( MonadPlus(..) )
+import Control.Monad.Trans           ( MonadTrans(..), MonadIO(..) )
+import Control.Monad.Sharing.Classes ( Sharing(..), Trans(..), eval )
 
 -- For fast and easy implementation of typed stores..
 import Unsafe.Coerce
