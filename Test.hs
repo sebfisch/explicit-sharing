@@ -6,7 +6,8 @@
      FlexibleContexts
   #-}
 
-import Control.Monad.Sharing.Lazy
+import Control.Monad.Sharing
+import Data.Monadic.List
 
 main = do
   putStr "failing tests: "
@@ -148,7 +149,7 @@ nest_share2 = assertEqual [(0::Int,0::Int),(1,1)] $ do
   x <- share (share coin >>= id)
   return (x,x)
 
-dup_dup = assertEqual [((0::Int,0::Int),(0::Int,0::Int)),((1,1),(1,1))] $ 
+dup_dup = assertEqual [((0::Int,0::Int),(0::Int,0::Int)),((1,1),(1,1))]
             (dup (dup coin :: Lazy [] (Lazy [] Int,Lazy [] Int))
               :: Lazy [] (Lazy [] (Lazy [] Int,Lazy [] Int),
                           Lazy [] (Lazy [] Int,Lazy [] Int)))
