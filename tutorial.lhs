@@ -4,13 +4,14 @@
 
 > {-# LANGUAGE PackageImports #-}
 > import "mtl" Control.Monad.Trans
+> import Data.Monadic.List
 
 </div>
 
 This [literate program][lhs] explains how to use the
 [explicit-sharing] package which provides the following module.
 
-> import Control.Monad.Sharing.Lazy
+> import Control.Monad.Sharing
 
 The interface of this module basically consists of two type
 classes. Instances of `Sharing` support a combinator `share` for
@@ -116,8 +117,8 @@ nested monadic data
 Let's return to the type class `Trans` that specifies what data can be
 shared. The `share` combinator is not only applicable to predefined
 Haskell types like `String` but also to user-defined types that
-contain nested monadic components. For example, the library for
-explicit sharing defines a type for lists with monadic heads and
+contain nested monadic components. For example, the module
+`Data.Monadic.List` defines a type for lists with monadic heads and
 tails.
 
 ~~~ { .Haskell }

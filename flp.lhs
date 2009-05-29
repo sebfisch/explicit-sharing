@@ -72,21 +72,25 @@ lazy permutation sort in Haskell
 --------------------------------
 
 In order to model this algorithm in pure Haskell we can use the
-`MonadPlus` type class to express non-determinism. However, in order
-to maintain the laziness of the algorithm we need a data type for
-non-deterministic lists that can be computed on demand. More
-specifically, we need to be able to yield the first element of a list
-whose tail is yet to be computed non-deterministically.
+`MonadPlus` type class to express non-determinism and the module
+
+> import Control.Monad.Sharing
+
+for explicit sharing. However, in order to maintain the laziness of
+the algorithm we need a data type for non-deterministic lists that can
+be computed on demand. More specifically, we need to be able to yield
+the first element of a list whose tail is yet to be computed
+non-deterministically.
 
 The `List` data type provided by this module
 
-> import Control.Monad.Sharing.Lazy
+> import Data.Monadic.List
 
-provides lists with nested monadic components which is exactly what we
-need. All we have to do is translate the Curry functions above (which
-use implicit non-determinism and implicit sharing) into equivalent
-Haskell functions that use explicit non-determinism and explicit
-sharing. Here we go:
+has nested monadic components which is exactly what we need. All we
+have to do is translate the Curry functions above (which use implicit
+non-determinism and implicit sharing) into equivalent Haskell
+functions that use explicit non-determinism and explicit sharing. Here
+we go:
 
 > sort :: (MonadPlus m, Sharing m) => m (List m Int) -> m (List m Int)
 > sort l = do p <- share (permute =<< l)
