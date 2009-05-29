@@ -1,20 +1,30 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
 -- to compile, run:
--- ghc -fglasgow-exts -hide-package monads-fd -O2 --make last
+-- ghc -fglasgow-exts -hide-package monads-fd -hide-package transformers -O2 --make last
 
 -- $ time ./last 1000000 +RTS -H1000M -K20M
 -- True
--- user	0m2.448s
+-- user	0m4.264s
+-- $ time ./last 10000000 +RTS -H1000M -K20M
+-- True
+-- user	0m49.657s
 
-import Control.Monad.Sharing.Lazy
+-- $ time ./last.mcc 1000000 +RTS -h1000m -k20m
+-- 1000000
+-- user	0m6.327s
+-- $ time ./last.mcc 10000000 +RTS -h2000m -k50m
+-- Not enough free memory after garbage collection
+
+import Control.Monad.Sharing
+import Data.Monadic.List
 import System ( getArgs )
 
 import Prelude hiding ( last )
 
 main =
  do n <- liftM (read.head) getArgs
-    let result = evalLazy . last . foldr cons nil . replicate n $ return True
+    let result = evalLazy . last . eval $ replicate n True
     mapM_ print (result :: [Bool])
 
 last :: (MonadPlus m, Sharing m) => m (List m Bool) -> m Bool

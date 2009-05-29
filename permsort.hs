@@ -1,22 +1,23 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
 -- to compile, run:
--- ghc -fglasgow-exts -hide-package monads-fd -O2 --make permsort.hs
+-- ghc -fglasgow-exts -hide-package monads-fd -hide-package transformers -O2 --make permsort.hs
 
 -- $ time ./permsort 20
--- user	0m12.400s
+-- user	0m13.265s
 
 -- time ./permsort.mcc 20
 -- user	0m25.067s
 
 
-import Control.Monad.Sharing.Lazy
+import Control.Monad.Sharing
+import Data.Monadic.List
 
 import System ( getArgs )
 
 main = do
   n <- liftM (read.head) getArgs
-  let result = evalLazy . sort . foldr cons nil . map return $ [1..n]
+  let result = evalLazy . sort . eval $ [(1::Int)..n]
   mapM_ print (result :: [[Int]])
 
 
