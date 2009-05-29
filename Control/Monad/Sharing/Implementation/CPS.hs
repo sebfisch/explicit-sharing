@@ -6,17 +6,17 @@
 
 {-# OPTIONS -fno-warn-name-shadowing #-}
 
--- | Module      : Control.Monad.Sharing.Implementation.CPS
--- | Copyright   : Chung-chieh Shan, Oleg Kiselyov, and Sebastian Fischer
--- | License     : PublicDomain
+-- | 
+-- Module      : Control.Monad.Sharing.Implementation.CPS
+-- Copyright   : Chung-chieh Shan, Oleg Kiselyov, and Sebastian Fischer
+-- License     : PublicDomain
+-- Maintainer  : Sebastian Fischer (sebf\@informatik.uni-kiel.de)
+-- Stability   : experimental
 -- |
--- | Maintainer  : Sebastian Fischer (sebf@informatik.uni-kiel.de)
--- | Stability   : experimental
--- |
--- | Implements explicit sharing by passing a heap using a state monad
--- | implemented by a combination of a continuation- with a reader
--- | monad. The definitions are inlined and hand-optimized to increase
--- | performance.
+-- Implements explicit sharing by passing a heap using a state monad
+-- implemented by a combination of a continuation- with a reader
+-- monad. The definitions are inlined and hand-optimized to increase
+-- performance.
 module Control.Monad.Sharing.Implementation.CPS (
 
   Lazy, evalLazy
@@ -32,18 +32,21 @@ import Unsafe.Coerce
 
 import qualified Data.IntMap as M
 
--- | Continuation-based, store-passing implementation of explicit
--- | sharing. It is an inlined version of @ContT (ReaderT Store m)@
--- | where the result type of continuations is polymorphic.
+-- |
+-- Continuation-based, store-passing implementation of explicit
+-- sharing. It is an inlined version of @ContT (ReaderT Store m)@
+-- where the result type of continuations is polymorphic.
 newtype Lazy m a = Lazy {
 
-  -- | Runs a computation of type @Lazy m a@ with given continuation
-  -- | and store.
+  -- |
+  -- Runs a computation of type @Lazy m a@ with given continuation and
+  -- store.
   fromLazy :: forall w . (a -> Store -> m w) -> Store -> m w
  }
 
--- | Lifts all monadic effects to the top-level and unwraps the monad
--- | transformer for explicit sharing.
+-- |
+-- Lifts all monadic effects to the top-level and unwraps the monad
+-- transformer for explicit sharing.
 evalLazy :: (Monad m, Trans (Lazy m) a b) => Lazy m a -> m b
 evalLazy m = runLazy (m >>= eval)
 
