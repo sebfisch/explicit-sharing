@@ -1,4 +1,4 @@
-% Comparing version 0.5 with version 0.1
+% Changes w.r.t. version 0.1
 
 The interface of the [library for explicit sharing][explicit-sharing]
 has changed since the first version to incorporate an alternative
