@@ -17,7 +17,7 @@ class Convertible m a b
   convArgs :: (forall c d . Convertible m c d => c -> m d) -> a -> m b
 ~~~
 
-This type class supports to convert back and forth between nested
+This type class supports converting back and forth between nested
 monadic data and isomorphic ordinary Haskell data. You can find
 example instances for monadic lists in the [tutorial].
 
