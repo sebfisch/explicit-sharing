@@ -394,7 +394,7 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
     >We can now execute lazy permutation sort in Haskell.</p
     ><pre
     ><code
-      >*Main&gt; evalLazy (sort (eval [(10::Int),9..1])) :: [[Int]]
+      >*Main&gt; evalLazy (sort (convert [(10::Int),9..1])) :: [[Int]]
 [[1,2,3,4,5,6,7,8,9,10]]
 </code
       ></pre
@@ -402,7 +402,7 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
     >The function <code
       >evalLazy</code
       > runs the computation in a lazy monad with explicit sharing and converts nested non-deterministic lists to ordinary lists. The function <code
-      >eval</code
+      >convert</code
       > converts in the other direction.</p
     ></body
   ></html

@@ -130,12 +130,13 @@ The functions `permute` and `insert` are non-deterministic:
 
 We can now execute lazy permutation sort in Haskell.
 
-    *Main> evalLazy (sort (eval [(10::Int),9..1])) :: [[Int]]
+    *Main> evalLazy (sort (convert [(10::Int),9..1])) :: [[Int]]
     [[1,2,3,4,5,6,7,8,9,10]]
 
 The function `evalLazy` runs the computation in a lazy monad with
 explicit sharing and converts nested non-deterministic lists to
-ordinary lists. The function `eval` converts in the other direction.
+ordinary lists. The function `convert` converts in the other
+direction.
 
 [lhs]: flp.lhs
 [Curry]: http://curry-language.org

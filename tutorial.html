@@ -117,16 +117,14 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
 	><span class="Function FunctionDefinition"
 	>share ::</span
 	><span class="Normal NormalText"
-	> Trans m a a =&gt; m a -&gt; m (m a)</span
+	> Shareable m a =&gt; m a -&gt; m (m a)</span
 	><br
 	 /></code
       ></pre
     ><p
     >The type class <code
-      >Trans</code
-      > provides an interface for generic traversals of nested monadic data types. We will come back to them later. For now, just think of <code
-      >Trans</code
-      > to specify data that can be shared explicitly.</p
+      >Shareable</code
+      > is an interface to data that can be shared explicitly.</p
     ><p
     >The function <code
       >share</code
@@ -365,7 +363,7 @@ xyz
       ></h2
     ><p
     >Let's return to the type class <code
-      >Trans</code
+      >Shareable</code
       > that specifies what data can be shared. The <code
       >share</code
       > combinator is not only applicable to predefined Haskell types like <code
@@ -386,7 +384,7 @@ xyz
     >In order to be able to use <code
       >share</code
       > with values of this type, we need an instance of <code
-      >Trans</code
+      >Shareable</code
       > (which is also provided out of the box).</p
     ><pre class="sourceCode Haskell"
     ><code
@@ -397,7 +395,7 @@ xyz
 	><span class="Keyword Class"
 	>Monad</span
 	><span class="Normal NormalText"
-	> m, Trans m a b) =&gt; Trans m (List m a) (List m b)</span
+	> m, Shareable m a) =&gt; Shareable m (List m a)</span
 	><br
 	 /><span class="Normal NormalText"
 	> </span
@@ -405,14 +403,14 @@ xyz
 	>where</span
 	><br
 	 /><span class="Normal NormalText"
-	>  trans _ Nil         = </span
+	>  shareArgs _ Nil         = </span
 	><span class="Function"
 	>return</span
 	><span class="Normal NormalText"
 	> Nil</span
 	><br
 	 /><span class="Normal NormalText"
-	>  trans f (Cons x xs) = </span
+	>  shareArgs f (Cons x xs) = </span
 	><span class="Function"
 	>return</span
 	><span class="Normal NormalText"
@@ -430,9 +428,9 @@ xyz
       ></pre
     ><p
     >The type class <code
-      >Trans</code
+      >Shareable</code
       > defines one operation <code
-      >trans</code
+      >shareArgs</code
       > to generically traverse nested monadic types. As you can see in the above instance declaration, the given function <code
       >f</code
       > is applied to every monadic child of a compound value and the results are combined using the matched constructor.</p
@@ -515,11 +513,13 @@ xyz
     ><p
     >How can we observe this list? The <code
       >List</code
-      > type comes with another instance of <code
-      >Trans</code
+      > type comes with an instance of another type class <code
+      >Convertible</code
       > that allows <code
       >evalLazy</code
-      > to convert it to ordinary Haskell lists.</p
+      > to convert <code
+      >List</code
+      >s to ordinary Haskell lists.</p
     ><pre class="sourceCode Haskell"
     ><code
       ><span class="Keyword"
@@ -529,7 +529,7 @@ xyz
 	><span class="Keyword Class"
 	>Monad</span
 	><span class="Normal NormalText"
-	> m, Trans m a b) =&gt; Trans m (List m a) [b]</span
+	> m, Convertible m a b) =&gt; Convertible m (List m a) [b]</span
 	><br
 	 /><span class="Normal NormalText"
 	> </span
@@ -537,14 +537,14 @@ xyz
 	>where</span
 	><br
 	 /><span class="Normal NormalText"
-	>  trans _ Nil         = </span
+	>  convArgs _ Nil         = </span
 	><span class="Function"
 	>return</span
 	><span class="Normal NormalText"
 	> []</span
 	><br
 	 /><span class="Normal NormalText"
-	>  trans f (Cons x xs) = </span
+	>  convArgs f (Cons x xs) = </span
 	><span class="Function"
 	>return</span
 	><span class="Normal NormalText"
@@ -552,11 +552,11 @@ xyz
 	><span class="Others InfixOperator"
 	>`ap`</span
 	><span class="Normal NormalText"
-	> join (f x) </span
+	> (x &gt;&gt;= f) </span
 	><span class="Others InfixOperator"
 	>`ap`</span
 	><span class="Normal NormalText"
-	> join (f xs)</span
+	> join (xs &gt;&gt;= f)</span
 	><br
 	 /></code
       ></pre
@@ -573,7 +573,7 @@ xyz
       ></pre
     ><p
     >In order to convert in the other direction, there is yet another instance of <code
-      >Trans</code
+      >Convertible</code
       > for <code
       >List</code
       >s:</p
@@ -586,7 +586,7 @@ xyz
 	><span class="Keyword Class"
 	>Monad</span
 	><span class="Normal NormalText"
-	> m, Trans m a b) =&gt; Trans m [a] (List m b)</span
+	> m, Convertible m a b) =&gt; Convertible m [a] (List m b)</span
 	><br
 	 /><span class="Normal NormalText"
 	> </span
@@ -605,23 +605,7 @@ xyz
 	><span class="Function"
 	>return</span
 	><span class="Normal NormalText"
-	> Cons </span
-	><span class="Others InfixOperator"
-	>`ap`</span
-	><span class="Normal NormalText"
-	> f (</span
-	><span class="Function"
-	>return</span
-	><span class="Normal NormalText"
-	> x) </span
-	><span class="Others InfixOperator"
-	>`ap`</span
-	><span class="Normal NormalText"
-	> f (</span
-	><span class="Function"
-	>return</span
-	><span class="Normal NormalText"
-	> xs)</span
+	> (Cons (f x) (f xs))</span
 	><br
 	 /></code
       ></pre
@@ -630,13 +614,13 @@ xyz
     ><pre class="sourceCode Haskell"
     ><code
       ><span class="Function FunctionDefinition"
-	>eval ::</span
+	>convert ::</span
 	><span class="Normal NormalText"
 	> (</span
 	><span class="Keyword Class"
 	>Monad</span
 	><span class="Normal NormalText"
-	> m, Trans m a b) =&gt; a -&gt; m b</span
+	> m, Convertible m a b) =&gt; a -&gt; m b</span
 	><br
 	 /></code
       ></pre
@@ -655,8 +639,10 @@ xyz
       >share</code
       > combinator from the type class <code
       >Sharing</code
-      > which implements explicit sharing of monadic effects such that monadic actions can be duplicated without duplicating their effects and three different instances of the type class <code
-      >Trans</code
+      > which implements explicit sharing of monadic effects such that monadic actions can be duplicated without duplicating their effects and three different instances of the type classes <code
+      >Shareable</code
+      > and <code
+      >Convertible</code
       > which allow nested monadic data to be shared and converted back and forth to ordinary data respectively. But what is this good for?</p
     ><p
     >A monadic effect whose interaction whith sharing is particularly interesting ins non-determinism. By combining the features for non-determinism provided by the <code

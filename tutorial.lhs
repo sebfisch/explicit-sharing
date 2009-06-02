@@ -22,12 +22,11 @@ know enough about monads you may want to look at the
 ~~~ { .Haskell }
 class Sharing m
  where
-  share :: Trans m a a => m a -> m (m a)
+  share :: Shareable m a => m a -> m (m a)
 ~~~
 
-The type class `Trans` provides an interface for generic traversals of
-nested monadic data types. We will come back to them later. For now,
-just think of `Trans` to specify data that can be shared explicitly.
+The type class `Shareable` is an interface to data that can be shared
+explicitly.
 
 The function `share` takes a monadic action of type `m a` and yields
 an action in the same monad which yields a monadic action of the same
@@ -114,10 +113,10 @@ the `error` call:
 nested monadic data
 -------------------
 
-Let's return to the type class `Trans` that specifies what data can be
-shared. The `share` combinator is not only applicable to predefined
-Haskell types like `String` but also to user-defined types that
-contain nested monadic components. For example, the module
+Let's return to the type class `Shareable` that specifies what data
+can be shared. The `share` combinator is not only applicable to
+predefined Haskell types like `String` but also to user-defined types
+that contain nested monadic components. For example, the module
 `Data.Monadic.List` defines a type for lists with monadic heads and
 tails.
 
@@ -126,20 +125,20 @@ data List m a = Nil | Cons (m a) (m (List m a))
 ~~~
 
 In order to be able to use `share` with values of this type, we need
-an instance of `Trans` (which is also provided out of the box).
+an instance of `Shareable` (which is also provided out of the box).
 
 ~~~ { .Haskell }
-instance (Monad m, Trans m a b) => Trans m (List m a) (List m b)
+instance (Monad m, Shareable m a) => Shareable m (List m a)
  where
-  trans _ Nil         = return Nil
-  trans f (Cons x xs) = return Cons `ap` f x `ap` f xs
+  shareArgs _ Nil         = return Nil
+  shareArgs f (Cons x xs) = return Cons `ap` f x `ap` f xs
 ~~~
 
-The type class `Trans` defines one operation `trans` to generically
-traverse nested monadic types. As you can see in the above instance
-declaration, the given function `f` is applied to every monadic child
-of a compound value and the results are combined using the matched
-constructor.
+The type class `Shareable` defines one operation `shareArgs` to
+generically traverse nested monadic types. As you can see in the above
+instance declaration, the given function `f` is applied to every
+monadic child of a compound value and the results are combined using
+the matched constructor.
 
 The `share` combinator uses this functionality to share nested monadic
 components of data recursively. Here is an example that shares an
@@ -163,15 +162,15 @@ contained actions are shared too. Hence, `a` and `as` are the same as
 duplicated. The result of `share_list` is a list with six elements
 that will read two characters from the standard input when executed.
 
-How can we observe this list? The `List` type comes with another
-instance of `Trans` that allows `evalLazy` to convert it to ordinary
-Haskell lists.
+How can we observe this list? The `List` type comes with an instance
+of another type class `Convertible` that allows `evalLazy` to convert
+`List`s to ordinary Haskell lists.
 
 ~~~ { .Haskell }
-instance (Monad m, Trans m a b) => Trans m (List m a) [b]
+instance (Monad m, Convertible m a b) => Convertible m (List m a) [b]
  where
-  trans _ Nil         = return []
-  trans f (Cons x xs) = return (:) `ap` join (f x) `ap` join (f xs)
+  convArgs _ Nil         = return []
+  convArgs f (Cons x xs) = return (:) `ap` (x >>= f) `ap` join (xs >>= f)
 ~~~
 
 This instance lifts all nested monadic effects to the top-level such
@@ -185,19 +184,19 @@ Now we can observe that indeed only two characters are read:
     "xyxxyx"
 
 In order to convert in the other direction, there is yet another
-instance of `Trans` for `List`s:
+instance of `Convertible` for `List`s:
 
 ~~~ { .Haskell }
-instance (Monad m, Trans m a b) => Trans m [a] (List m b)
+instance (Monad m, Convertible m a b) => Convertible m [a] (List m b)
  where
   trans _ []     = return Nil
-  trans f (x:xs) = return Cons `ap` f (return x) `ap` f (return xs)
+  trans f (x:xs) = return (Cons (f x) (f xs))
 ~~~
 
 Thanks to this instance, we can use the function
 
 ~~~ { .Haskell }
-eval :: (Monad m, Trans m a b) => a -> m b
+convert :: (Monad m, Convertible m a b) => a -> m b
 ~~~
 
 to convert a list of type `[Char]` into one of type `m (List m Char)`.
@@ -208,9 +207,10 @@ outlook
 Now, we have seen it all: the `share` combinator from the type class
 `Sharing` which implements explicit sharing of monadic effects such
 that monadic actions can be duplicated without duplicating their
-effects and three different instances of the type class `Trans` which
-allow nested monadic data to be shared and converted back and forth to
-ordinary data respectively. But what is this good for?
+effects and three different instances of the type classes `Shareable`
+and `Convertible` which allow nested monadic data to be shared and
+converted back and forth to ordinary data respectively. But what is
+this good for?
 
 A monadic effect whose interaction whith sharing is particularly
 interesting ins non-determinism. By combining the features for
