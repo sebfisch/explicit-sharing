@@ -189,8 +189,8 @@ instance of `Convertible` for `List`s:
 ~~~ { .Haskell }
 instance (Monad m, Convertible m a b) => Convertible m [a] (List m b)
  where
-  trans _ []     = return Nil
-  trans f (x:xs) = return (Cons (f x) (f xs))
+  convArgs _ []     = return Nil
+  convArgs f (x:xs) = return (Cons (f x) (f xs))
 ~~~
 
 Thanks to this instance, we can use the function
