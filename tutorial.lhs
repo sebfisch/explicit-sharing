@@ -15,7 +15,7 @@ This [literate program][lhs] explains how to use the
 
 The interface of this module basically consists of two type
 classes. Instances of `Sharing` support a combinator `share` for
-explicit sharing and are usually monads. If you fell like you don't
+explicit sharing and are usually monads. If you feel like you don't
 know enough about monads you may want to look at the
 [Typeclassopedia].
 
