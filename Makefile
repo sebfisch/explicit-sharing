@@ -1,6 +1,6 @@
 .PHONY: all
 
-all: index.htm tutorial.html flp.html
+all: index.htm tutorial.html flp.html changes.html
 
 %.htm: %.md
 	pandoc --standalone --css=style.css --output=$@ $<

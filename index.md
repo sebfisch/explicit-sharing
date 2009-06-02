@@ -26,6 +26,8 @@ learn
     like advocated by the [Curry] language can be most easily grasped
     [by example][FLP].
 
+  * The current interface [differs][changes] from the original version.
+
 contribute
 ----------
 
@@ -50,6 +52,7 @@ For questions or feedback contact [Sebastian Fischer].
 [tutorial]: tutorial.html
 [Curry]: http://curry-language.org
 [FLP]: flp.html
+[changes]: changes.html
 
 [GitHub]: http://github.com/sebfisch/explicit-sharing
 [issues]: http://github.com/sebfisch/explicit-sharing/issues
