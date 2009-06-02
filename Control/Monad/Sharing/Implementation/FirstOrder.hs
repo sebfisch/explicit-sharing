@@ -18,7 +18,7 @@ module Control.Monad.Sharing.Implementation.FirstOrder (
 
  ) where
 
-import Control.Monad       ( MonadPlus(..) )
+import Control.Monad       ( MonadPlus(..), liftM )
 -- import Control.Monad.State ( MonadState(..), StateT, evalStateT )
 import Control.Monad.Trans ( MonadTrans(..), MonadIO(..) )
 
@@ -47,7 +47,7 @@ type S m a = CPS.Lazy m a
 
 evalS :: Monad m => S m a -> m a
 -- evalS m = evalStateT m emptyStore
-evalS m = CPS.runLazy m
+evalS = CPS.runLazy
 
 -- using 'CPS.Lazy' instead of 'StateT Store' is almost twice as fast.
 
@@ -60,7 +60,7 @@ data Labeled m a
 
 
 gnf :: (Monad m, Shareable (Lazy m) a) => Lazy m a -> S (Lazy m) a
-gnf a = hnf a >>= shareArgs (\b -> gnf b >>= return . return)
+gnf a = hnf a >>= shareArgs (liftM return . gnf)
 
 hnf :: Monad m => Lazy m a -> S (Lazy m) a
 hnf m = run =<< lift (lift (fromLazy m))
@@ -107,7 +107,7 @@ instance MonadPlus m => MonadPlus (Lazy m)
 -- 'Lazy t' is a monad transformer.
 instance MonadTrans Lazy
  where
-  lift a = Lazy (a >>= return . Lifted)
+  lift = Lazy . liftM Lifted
 
 -- If the underlying monad supports IO we can lift this functionality.
 instance MonadIO m => MonadIO (Lazy m)
