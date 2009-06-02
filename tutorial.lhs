@@ -170,7 +170,7 @@ of another type class `Convertible` that allows `evalLazy` to convert
 instance (Monad m, Convertible m a b) => Convertible m (List m a) [b]
  where
   convArgs _ Nil         = return []
-  convArgs f (Cons x xs) = return (:) `ap` (x >>= f) `ap` join (xs >>= f)
+  convArgs f (Cons x xs) = return (:) `ap` (x >>= f) `ap` (xs >>= f)
 ~~~
 
 This instance lifts all nested monadic effects to the top-level such
