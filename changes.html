@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+><head
+  ><title
+    >Comparing version 0.5 with version 0.1</title
+    ><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"
+     /><meta name="generator" content="pandoc"
+     /><style type="text/css"
+    >
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode, table.sourceCode pre 
+   { margin: 0; padding: 0; border: 0; vertical-align: baseline; border: none; }
+td.lineNumbers { border-right: 1px solid #AAAAAA; text-align: right; color: #AAAAAA; padding-right: 5px; padding-left: 5px; }
+td.sourceCode { padding-left: 5px; }
+pre.sourceCode { }
+pre.sourceCode span.Normal { }
+pre.sourceCode span.Keyword { color: #007020; font-weight: bold; } 
+pre.sourceCode span.DataType { color: #902000; }
+pre.sourceCode span.DecVal { color: #40a070; }
+pre.sourceCode span.BaseN { color: #40a070; }
+pre.sourceCode span.Float { color: #40a070; }
+pre.sourceCode span.Char { color: #4070a0; }
+pre.sourceCode span.String { color: #4070a0; }
+pre.sourceCode span.Comment { color: #60a0b0; font-style: italic; }
+pre.sourceCode span.Others { color: #007020; }
+pre.sourceCode span.Alert { color: red; font-weight: bold; }
+pre.sourceCode span.Function { color: #06287e; }
+pre.sourceCode span.RegionMarker { }
+pre.sourceCode span.Error { color: red; font-weight: bold; }
+</style
+    ><link rel="stylesheet" href="lhs.css" type="text/css" media="all" />
+</head
+  ><body
+  ><h1 class="title"
+    >Comparing version 0.5 with version 0.1</h1
+    ><div id="toc"
+    ><ul
+      ><li
+	><a href="#converting-nested-monadic-data" id="TOC-converting-nested-monadic-data"
+	  >converting nested monadic data</a
+	  ></li
+	><li
+	><a href="#Nondet-is-now-Shareable" id="TOC-Nondet-is-now-Shareable"
+	  ><code
+	    >Nondet</code
+	    > is now <code
+	    >Shareable</code
+	    ></a
+	  ></li
+	><li
+	><a href="#alternative-implementation" id="TOC-alternative-implementation"
+	  >alternative implementation</a
+	  ></li
+	></ul
+      ></div
+    ><p
+    >The interface of the <a href="index.html"
+      >library for explicit sharing</a
+      > has changed since the first version to incorporate an alternative implementation and support conversion between nested monadic data and ordinary Haskell types.</p
+    ><h2 id="converting-nested-monadic-data"
+    ><a href="#TOC-converting-nested-monadic-data"
+      >converting nested monadic data</a
+      ></h2
+    ><p
+    >The is now a type class <code
+      >Convertible</code
+      > defined as follows.</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Keyword"
+	>class</span
+	><span class="Normal NormalText"
+	> Convertible m a b</span
+	><br
+	 /><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>where</span
+	><br
+	 /><span class="Normal NormalText"
+	>  </span
+	><span class="Function FunctionDefinition"
+	>convArgs ::</span
+	><span class="Normal NormalText"
+	> (forall c d . Convertible m c d =&gt; c -&gt; m d) -&gt; a -&gt; m b</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >This type class supports to convert back and forth between nested monadic data and isomorphic ordinary Haskell data. You can find example instances for monadic lists in the <a href="tutorial.html#nested-monadic-data"
+      >tutorial</a
+      >.</p
+    ><h2 id="Nondet-is-now-Shareable"
+    ><a href="#TOC-Nondet-is-now-Shareable"
+      ><code
+	>Nondet</code
+	> is now <code
+	>Shareable</code
+	></a
+      ></h2
+    ><p
+    >The type class <code
+      >Nondet</code
+      > has been replaced by a generalized type class <code
+      >Shareable</code
+      > that allows the monad which is used for the transformation of arguments to be different from the monad that wraps nested arguments. Instead of the operation</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>mapNondet ::</span
+	><span class="Normal NormalText"
+	> (forall b . Nondet m b =&gt; m b -&gt; m (m b)) -&gt; a -&gt; m a</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >the class <code
+      >Shareable</code
+      > defines the following operation.</p
+    ><pre class="sourceCode Haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>shareArgs ::</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword Class"
+	>Monad</span
+	><span class="Normal NormalText"
+	> n =&gt; (forall b . Shareable m b =&gt; m b -&gt; n (m b)) -&gt; a -&gt; n a</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >This generalization allows to use a state monad when sharing arguments even if no state monad is used to represent monadic arguments and was necessary to implement the alternative approach to explicit sharing.</p
+    ><h2 id="alternative-implementation"
+    ><a href="#TOC-alternative-implementation"
+      >alternative implementation</a
+      ></h2
+    ><p
+    >There is an experimental version of an alternative implementation available via the module <code
+      >Control.Monad.Sharing.FirstOrder</code
+      >. It represents monadic actions as first order data types instead of state-passing functions and avoids some deficiencies of the original implementation. It avoids duplicate sharing when sharing an already shared value and supports (some) sharing across non-determinism.</p
+    ><p
+    >This implementation is not (yet) as efficient as the continuation-based default implementation, so you should usually use the original version and only resort to the new one, if your program suffers from duplicate sharing or benefits considerably from sharing across non-determinism as provided by the new implementation.</p
+    ></body
+  ></html
+>
+
