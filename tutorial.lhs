@@ -196,7 +196,7 @@ instance (Monad m, Convertible m a b) => Convertible m [a] (List m b)
 Thanks to this instance, we can use the function
 
 ~~~ { .Haskell }
-convert :: (Monad m, Convertible m a b) => a -> m b
+convert :: Convertible m a b => a -> m b
 ~~~
 
 to convert a list of type `[Char]` into one of type `m (List m Char)`.
