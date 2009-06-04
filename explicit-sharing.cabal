@@ -1,5 +1,5 @@
 Name:          explicit-sharing
-Version:       0.5.0
+Version:       0.5.1
 Cabal-Version: >= 1.6
 Synopsis:      Explicit Sharing of Monadic Effects
 Description:   
@@ -20,7 +20,7 @@ Stability:     experimental
 Extra-Source-Files: Test.hs
 
 Library
-  Build-Depends:    base, containers ==0.2.0.0, mtl
+  Build-Depends:    base >= 3 && < 5, containers ==0.2.0.0, mtl
   Exposed-Modules:  Control.Monad.Sharing,
                     Control.Monad.Sharing.Classes,
                     Control.Monad.Sharing.FirstOrder,
