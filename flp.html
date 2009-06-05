@@ -47,7 +47,7 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
     ><p
     >This <a href="flp.lhs"
       >literate program</a
-      > explains how to express programs written in the lazy functional-logic programming language <a href="http://curry-language.org"
+      > explains how to express programs written in the lazy functional logic programming language <a href="http://curry-language.org"
       >Curry</a
       > in pure Haskell using the <a href="index.html"
       >explicit-sharing</a
@@ -59,7 +59,7 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
       >lazy permutation sort in Curry</a
       ></h2
     ><p
-    >Lazy functional-logic programming is tailor made for expressing demand driven search algorithms concisely. For example, we can express sorting as a demand driven search problem in Curry as follows.</p
+    >Lazy functional logic programming is tailor made for expressing demand driven search algorithms concisely. For example, we can express sorting as a demand driven search problem in Curry as follows.</p
     ><pre class="sourceCode Haskell"
     ><code
       ><span class="Function FunctionDefinition"
@@ -91,7 +91,7 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
     ><p
     >Note that we have successfully split the task of sorting into two independent tasks that are easier to implement: how to permute a list and how to check whether a list is sorted.</p
     ><p
-    >Lazy functional-logic programming provides the machinery to implement these tasks separately, yet execute them in a trickily interleaved way, such that the generating part (which permutes lists) produces values only to the extend demanded by the testing part (which checks whether a list is sorted).</p
+    >Lazy functional logic programming provides the machinery to implement these tasks separately, yet execute them in a trickily interleaved way, such that the generating part (which permutes lists) produces values only to the extend demanded by the testing part (which checks whether a list is sorted).</p
     ><p
     >We can implement the tester and generator for the above sorting algorithm in Curry as follows.</p
     ><pre class="sourceCode Haskell"

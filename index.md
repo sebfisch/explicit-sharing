@@ -2,7 +2,7 @@
 
 This [Haskell] package implements explicit sharing of monadic
 effects. Its most prominent application is probably the implementation
-of lazy non-determinism to emulate functional-logic programming.
+of lazy non-determinism to emulate functional logic programming.
 
 
 install
@@ -22,7 +22,7 @@ learn
   * The [tutorial] introduction explains how to use the interface of
     the library for explicit sharing.
 
-  * The application of this library to functional-logic programming
+  * The application of this library to functional logic programming
     like advocated by the [Curry] language can be most easily grasped
     [by example][FLP].
 

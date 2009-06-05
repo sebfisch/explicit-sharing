@@ -216,7 +216,7 @@ A monadic effect whose interaction whith sharing is particularly
 interesting ins non-determinism. By combining the features for
 non-determinism provided by the `MonadPlus` type class with explicit
 sharing provided by the `Sharing` class we can implement lazy
-functional-logic programming as advocated, e.g., by the [Curry]
+functional logic programming as advocated, e.g., by the [Curry]
 language in pure Haskell.
 
 [How to translate Curry programs to Haskell using explicit

@@ -1,7 +1,7 @@
 % lazy FLP in pure Haskell
 
 This [literate program][lhs] explains how to express programs written
-in the lazy functional-logic programming language [Curry] in pure
+in the lazy functional logic programming language [Curry] in pure
 Haskell using the [explicit-sharing] package. If you have not done so
 already you may want to read the [tutorial] introduction to this
 package first.
@@ -10,7 +10,7 @@ package first.
 lazy permutation sort in Curry
 ------------------------------
 
-Lazy functional-logic programming is tailor made for expressing demand
+Lazy functional logic programming is tailor made for expressing demand
 driven search algorithms concisely. For example, we can express
 sorting as a demand driven search problem in Curry as follows.
 
@@ -29,7 +29,7 @@ Note that we have successfully split the task of sorting into two
 independent tasks that are easier to implement: how to permute a list
 and how to check whether a list is sorted.
 
-Lazy functional-logic programming provides the machinery to implement
+Lazy functional logic programming provides the machinery to implement
 these tasks separately, yet execute them in a trickily interleaved
 way, such that the generating part (which permutes lists) produces
 values only to the extend demanded by the testing part (which checks
