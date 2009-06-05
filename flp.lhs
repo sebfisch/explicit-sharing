@@ -120,7 +120,7 @@ of order.
 The functions `permute` and `insert` are non-deterministic:
 
 > permute :: MonadPlus m => List m a -> m (List m a)
-> permute Nil           = return Nil
+> permute Nil           = nil
 > permute (Cons mx mxs) = insert mx (permute =<< mxs)
 >
 > insert :: MonadPlus m => m a -> m (List m a) -> m (List m a)

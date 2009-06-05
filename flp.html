@@ -356,11 +356,7 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
 	> MonadPlus m =&gt; List m a -&gt; m (List m a)</span
 	><br
 	 /><span class="Normal NormalText"
-	>permute Nil           = </span
-	><span class="Function"
-	>return</span
-	><span class="Normal NormalText"
-	> Nil</span
+	>permute Nil           = nil</span
 	><br
 	 /><span class="Normal NormalText"
 	>permute (Cons mx mxs) = insert mx (permute =&lt;&lt; mxs)</span
