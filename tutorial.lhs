@@ -148,7 +148,7 @@ them that are duplicated.
 > share_list :: (MonadIO m, Sharing m) => m (List m Char)
 > share_list = do gets <- share getChars
 >                 Cons x xs <- gets
->                 Cons y ys <- as
+>                 Cons y ys <- xs
 >                 Cons z zs <- gets
 >                 cons x (cons y (cons z (cons x (cons y (cons z nil)))))
 >  where
