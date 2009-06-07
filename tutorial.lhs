@@ -42,17 +42,17 @@ explicit sharing.
 
 > dup_get :: IO String
 > dup_get = do let get = getChar
->              a <- get
->              b <- get
->              c <- get
->              return [a,b,c]
+>              x <- get
+>              y <- get
+>              z <- get
+>              return [x,y,z]
 
 This action renames the predefined action `getChar` and calls it three
 times returning a list of the results of the three calls:
 
     *Main> dup_get
-    xyz
-    "xyz"
+    abc
+    "abc"
 
 Each occurrence of `get` reads a different character from standard
 input, i.e., has its own independent input effect and all occurrences
@@ -70,27 +70,27 @@ Here is a variant of the above action with explicit sharing.
 
 > dup_shared_get :: (MonadIO m, Sharing m) => m String
 > dup_shared_get = do get <- share (liftIO getChar)
->                     a <- get
->                     b <- get
->                     c <- get
->                     return [a,b,c]
+>                     x <- get
+>                     y <- get
+>                     z <- get
+>                     return [x,y,z]
 
 Instead of the built-in `let` construct this action uses the `share`
 combinator to share the (now lifted) `getChar` action. We need to lift
-the `getChar` action because we cannot execute `dup_shaed_get`
+the `getChar` action because we cannot execute `dup_shared_get`
 directly in the IO monad which does not support the `share`
 combinator.
 
 We can run this action using the operation `evalLazy`.
 
     *Main> evalLazy dup_shared_get :: IO String
-    xyz
-    "xxx"
+    abc
+    "aaa"
 
-This time, the result is `"xxx"` rather than `"xyz"`. The shared `get`
+This time, the result is `"aaa"` rather than `"abc"`. The shared `get`
 action only performs the effects of `getChar` once and yields the
 result of the first execution at each duplicated occurrence. The
-remaining characters (`"yz"` in the example call above) are never
+remaining characters (`"bc"` in the example call above) are never
 read.
 
 This behaviour may seem as if `share` simply executes the given action
@@ -147,18 +147,18 @@ them that are duplicated.
 
 > share_list :: (MonadIO m, Sharing m) => m (List m Char)
 > share_list = do gets <- share getChars
->                 Cons a as <- gets
->                 Cons b bs <- as
->                 Cons c cs <- gets
->                 cons a (cons b (cons c (cons a (cons b (cons c nil)))))
+>                 Cons x xs <- gets
+>                 Cons y ys <- as
+>                 Cons z zs <- gets
+>                 cons x (cons y (cons z (cons x (cons y (cons z nil)))))
 >  where
 >   getChars = cons (liftIO getChar) getChars
 
 The functions `nil` and `cons` are helper functions to construct
 nested monadic lists. This example is definitely contrived but it
-helps to make a point: the infine list `gets` is shared and hence all
-contained actions are shared too. Hence, `a` and `as` are the same as
-`c` and `cs` and all actions yield the same results when
+helps to make a point: the infine list `gets` is shared and all
+contained actions are shared too. Hence, `x` and `xs` are the same as
+`z` and `zs` and all actions yield the same results when
 duplicated. The result of `share_list` is a list with six elements
 that will read two characters from the standard input when executed.
 
@@ -180,8 +180,8 @@ any nested effects.
 Now we can observe that indeed only two characters are read:
 
     *Main> evalLazy share_list :: IO String
-    xyz
-    "xyxxyx"
+    abc
+    "abaaba"
 
 In order to convert in the other direction, there is yet another
 instance of `Convertible` for `List`s:

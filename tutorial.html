@@ -166,20 +166,20 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
 	>getChar</span
 	><br
 	 /><span class="Normal NormalText"
-	>             a &lt;- get</span
+	>             x &lt;- get</span
 	><br
 	 /><span class="Normal NormalText"
-	>             b &lt;- get</span
+	>             y &lt;- get</span
 	><br
 	 /><span class="Normal NormalText"
-	>             c &lt;- get</span
+	>             z &lt;- get</span
 	><br
 	 /><span class="Normal NormalText"
 	>             </span
 	><span class="Function"
 	>return</span
 	><span class="Normal NormalText"
-	> [a,b,c]</span
+	> [x,y,z]</span
 	><br
 	 /></code
       ></pre
@@ -190,8 +190,8 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
     ><pre
     ><code
       >*Main&gt; dup_get
-xyz
-&quot;xyz&quot;
+abc
+&quot;abc&quot;
 </code
       ></pre
     ><p
@@ -233,20 +233,20 @@ xyz
 	>)</span
 	><br
 	 /><span class="Normal NormalText"
-	>                    a &lt;- get</span
+	>                    x &lt;- get</span
 	><br
 	 /><span class="Normal NormalText"
-	>                    b &lt;- get</span
+	>                    y &lt;- get</span
 	><br
 	 /><span class="Normal NormalText"
-	>                    c &lt;- get</span
+	>                    z &lt;- get</span
 	><br
 	 /><span class="Normal NormalText"
 	>                    </span
 	><span class="Function"
 	>return</span
 	><span class="Normal NormalText"
-	> [a,b,c]</span
+	> [x,y,z]</span
 	><br
 	 /></code
       ></pre
@@ -260,7 +260,7 @@ xyz
       > action. We need to lift the <code
       >getChar</code
       > action because we cannot execute <code
-      >dup_shaed_get</code
+      >dup_shared_get</code
       > directly in the IO monad which does not support the <code
       >share</code
       > combinator.</p
@@ -271,21 +271,21 @@ xyz
     ><pre
     ><code
       >*Main&gt; evalLazy dup_shared_get :: IO String
-xyz
-&quot;xxx&quot;
+abc
+&quot;aaa&quot;
 </code
       ></pre
     ><p
     >This time, the result is <code
-      >&quot;xxx&quot;</code
+      >&quot;aaa&quot;</code
       > rather than <code
-      >&quot;xyz&quot;</code
+      >&quot;abc&quot;</code
       >. The shared <code
       >get</code
       > action only performs the effects of <code
       >getChar</code
       > once and yields the result of the first execution at each duplicated occurrence. The remaining characters (<code
-      >&quot;yz&quot;</code
+      >&quot;bc&quot;</code
       > in the example call above) are never read.</p
     ><p
     >This behaviour may seem as if <code
@@ -461,22 +461,18 @@ xyz
 	> gets &lt;- share getChars</span
 	><br
 	 /><span class="Normal NormalText"
-	>                Cons a </span
-	><span class="Keyword"
-	>as</span
-	><span class="Normal NormalText"
-	> &lt;- gets</span
+	>                Cons x xs &lt;- gets</span
 	><br
 	 /><span class="Normal NormalText"
-	>                Cons b bs &lt;- </span
+	>                Cons y ys &lt;- </span
 	><span class="Keyword"
 	>as</span
 	><br
 	 /><span class="Normal NormalText"
-	>                Cons c cs &lt;- gets</span
+	>                Cons z zs &lt;- gets</span
 	><br
 	 /><span class="Normal NormalText"
-	>                cons a (cons b (cons c (cons a (cons b (cons c nil)))))</span
+	>                cons x (cons y (cons z (cons x (cons y (cons z nil)))))</span
 	><br
 	 /><span class="Normal NormalText"
 	> </span
@@ -499,14 +495,14 @@ xyz
       >cons</code
       > are helper functions to construct nested monadic lists. This example is definitely contrived but it helps to make a point: the infine list <code
       >gets</code
-      > is shared and hence all contained actions are shared too. Hence, <code
-      >a</code
+      > is shared and all contained actions are shared too. Hence, <code
+      >x</code
       > and <code
-      >as</code
+      >xs</code
       > are the same as <code
-      >c</code
+      >z</code
       > and <code
-      >cs</code
+      >zs</code
       > and all actions yield the same results when duplicated. The result of <code
       >share_list</code
       > is a list with six elements that will read two characters from the standard input when executed.</p
@@ -567,8 +563,8 @@ xyz
     ><pre
     ><code
       >*Main&gt; evalLazy share_list :: IO String
-xyz
-&quot;xyxxyx&quot;
+abc
+&quot;abaaba&quot;
 </code
       ></pre
     ><p
