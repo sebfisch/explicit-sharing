@@ -1,5 +1,5 @@
 import HLint.Default
-import HLint.Generalize
+import HLint.Generalise
 import HLint.Dollar
 
 -- ignore some hints w.r.t. eta-reduction
