@@ -26,7 +26,8 @@ learn
     like advocated by the [Curry] language can be most easily grasped
     [by example][FLP].
 
-  * There is a [paper] that explains the ideas behind this package.
+  * There is a [paper] that explains the ideas behind this package in
+    depth.
 
   * The current interface [differs][changes] from the original version.
 
