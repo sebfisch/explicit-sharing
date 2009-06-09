@@ -7,8 +7,9 @@
 -- 
 -- This library provides an interface to monads that support explicit
 -- sharing based on two-level types. This implementation is not as
--- efficient as the default implementation but it avoids duplicate
--- sharing which can lead to exponential blowup of the threaded heap.
+-- efficient as the default implementation but supports a restricted
+-- form of sharing across non-determinism if a first-order data type
+-- is used as underlying monad.
 module Control.Monad.Sharing.FirstOrder (
 
   module Control.Monad,
