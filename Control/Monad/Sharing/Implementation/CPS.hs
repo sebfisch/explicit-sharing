@@ -36,6 +36,8 @@ import Unsafe.Coerce
 
 import qualified Data.IntMap as M
 
+-- import Debug.Trace ( trace )
+
 -- |
 -- Continuation-based, store-passing implementation of explicit
 -- sharing. It is an inlined version of @ContT (ReaderT Store m)@
@@ -58,6 +60,7 @@ evalLazy m = runLazy (m >>= convert)
 
 runLazy :: Monad m => Lazy m a -> m a
 runLazy m = fromLazy m (\a _ -> return a) emptyStore
+  -- fromLazy m (\a s -> trace (show (nextLabel s)) (return a)) emptyStore
 
 -- Stores consist of a fresh-reference counter and a heap represented
 -- as IntMap.
