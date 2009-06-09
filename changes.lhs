@@ -51,15 +51,14 @@ alternative implementation
 There is an experimental version of an alternative implementation
 available via the module `Control.Monad.Sharing.FirstOrder`. It
 represents monadic actions as first order data types instead of
-state-passing functions and avoids some deficiencies of the original
-implementation. It avoids duplicate sharing when sharing an already
-shared value and supports (some) sharing across non-determinism.
+state-passing functions and, hence, supports (some) sharing across
+non-determinism.
 
 This implementation is not (yet) as efficient as the
 continuation-based default implementation, so you should usually use
 the original version and only resort to the new one, if your program
-suffers from duplicate sharing or benefits considerably from sharing
-across non-determinism as provided by the new implementation.
+benefits considerably from sharing across non-determinism as provided
+by the new implementation.
 
 An example program that benefits from sharing across non-determinism
 is the following:
@@ -124,6 +123,6 @@ if we use the alternative version. The default version recomputes `fib
 [explicit-sharing]: index.html
 [tutorial]: tutorial.html#nested-monadic-data
 
-[PACKS]: http://www.informatik.uni-kiel.de/~pakcs/
+[PAKCS]: http://www.informatik.uni-kiel.de/~pakcs/
 [MCC]: http://danae.uni-muenster.de/~lux/curry/
 [KiCS]: http://www.informatik.uni-kiel.de/prog/mitarbeiter/bernd-brassel/projects/

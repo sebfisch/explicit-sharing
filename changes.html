@@ -138,9 +138,190 @@ pre.sourceCode span.Error { color: red; font-weight: bold; }
     ><p
     >There is an experimental version of an alternative implementation available via the module <code
       >Control.Monad.Sharing.FirstOrder</code
-      >. It represents monadic actions as first order data types instead of state-passing functions and avoids some deficiencies of the original implementation. It avoids duplicate sharing when sharing an already shared value and supports (some) sharing across non-determinism.</p
+      >. It represents monadic actions as first order data types instead of state-passing functions and, hence, supports (some) sharing across non-determinism.</p
     ><p
-    >This implementation is not (yet) as efficient as the continuation-based default implementation, so you should usually use the original version and only resort to the new one, if your program suffers from duplicate sharing or benefits considerably from sharing across non-determinism as provided by the new implementation.</p
+    >This implementation is not (yet) as efficient as the continuation-based default implementation, so you should usually use the original version and only resort to the new one, if your program benefits considerably from sharing across non-determinism as provided by the new implementation.</p
+    ><p
+    >An example program that benefits from sharing across non-determinism is the following:</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Keyword"
+	>import</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal ModuleName"
+	>Control.Monad.Sharing.FirstOrder</span
+	><br
+	 /><span class="Keyword"
+	>import</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Normal ModuleName"
+	>Data.Monadic.List</span
+	><br
+	 /><br
+	 /><span class="Keyword"
+	>import</span
+	><span class="Normal NormalText"
+	> Prelude hiding ( </span
+	><span class="Function"
+	>last</span
+	><span class="Normal NormalText"
+	> )</span
+	><br
+	 /><br
+	 /><span class="Function FunctionDefinition"
+	>listOf ::</span
+	><span class="Normal NormalText"
+	> (MonadPlus m, Sharing m, Shareable m a) =&gt; m a -&gt; m (List m a)</span
+	><br
+	 /><span class="Normal NormalText"
+	>listOf x = nil</span
+	><br
+	 /><span class="Normal NormalText"
+	>   </span
+	><span class="Others InfixOperator"
+	>`mplus`</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> y &lt;- share x</span
+	><br
+	 /><span class="Normal NormalText"
+	>              cons y (listOf y)</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >The function <code
+      >listOf</code
+      > non-deterministically yields a list of arbitrary length that only contains the given element (which may itself be non-deterministic).</p
+    ><p
+    >If we apply <code
+      >listOf</code
+      > to an expensive computation this computation would be reexecuted on every non-deterministic branch on which it is demanded. This behaviour resembles the behaviour of the Curry systems <a href="http://www.informatik.uni-kiel.de/~pakcs/"
+      >PAKCS</a
+      > and <a href="http://danae.uni-muenster.de/~lux/curry/"
+      >MCC</a
+      >. If we use the alternative implementation of explicit sharing the expensive computation is only executed once if its result is a first-order value which is the case in this example, if the underlying monad is, e.g., the list monad. This behaviour resembles the behaviour of the Curry system <a href="http://www.informatik.uni-kiel.de/prog/mitarbeiter/bernd-brassel/projects/"
+      >KiCS</a
+      >.</p
+    ><p
+    >We can observe the difference by applying the <code
+      >last</code
+      > function to the result of <code
+      >listOf</code
+      >.</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function"
+	>last</span
+	><span class="Normal NormalText"
+	> :: (MonadPlus m, Sharing m, Shareable m a) =&gt; List m a -&gt; m a</span
+	><br
+	 /><span class="Function"
+	>last</span
+	><span class="Normal NormalText"
+	> Nil           = mzero</span
+	><br
+	 /><span class="Function"
+	>last</span
+	><span class="Normal NormalText"
+	> (Cons mx mxs) = </span
+	><span class="Keyword"
+	>do</span
+	><span class="Normal NormalText"
+	> mys &lt;- share mxs</span
+	><br
+	 /><span class="Normal NormalText"
+	>                        ys &lt;- mys</span
+	><br
+	 /><span class="Normal NormalText"
+	>                        </span
+	><span class="Keyword"
+	>case</span
+	><span class="Normal NormalText"
+	> ys </span
+	><span class="Keyword"
+	>of</span
+	><br
+	 /><span class="Normal NormalText"
+	>                          Nil         -&gt; mx </span
+	><br
+	 /><span class="Normal NormalText"
+	>                          Cons mz mzs -&gt; </span
+	><span class="Function"
+	>last</span
+	><span class="Normal NormalText"
+	> =&lt;&lt; mys</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >As expensive computation we use the recursive implementation of the Fibonacci function in monadic style.</p
+    ><pre class="sourceCode haskell"
+    ><code
+      ><span class="Function FunctionDefinition"
+	>fib ::</span
+	><span class="Normal NormalText"
+	> </span
+	><span class="Keyword Class"
+	>Monad</span
+	><span class="Normal NormalText"
+	> m =&gt; </span
+	><span class="DataType TypeConstructor"
+	>Int</span
+	><span class="Normal NormalText"
+	> -&gt; m </span
+	><span class="DataType TypeConstructor"
+	>Int</span
+	><br
+	 /><span class="Normal NormalText"
+	>fib n | n &lt; </span
+	><span class="DecVal Decimal"
+	>2</span
+	><span class="Normal NormalText"
+	>     = </span
+	><span class="Function"
+	>return</span
+	><span class="Normal NormalText"
+	> n</span
+	><br
+	 /><span class="Normal NormalText"
+	>      | </span
+	><span class="Function"
+	>otherwise</span
+	><span class="Normal NormalText"
+	> = liftM2 (+) (fib (n</span
+	><span class="DecVal Decimal"
+	>-2</span
+	><span class="Normal NormalText"
+	>)) (fib (n</span
+	><span class="DecVal Decimal"
+	>-1</span
+	><span class="Normal NormalText"
+	>))</span
+	><br
+	 /></code
+      ></pre
+    ><p
+    >If we now query some solutions of the following computation</p
+    ><pre
+    ><code
+      > &gt; mapM_ print $ take 5 (evalLazy (last =&lt;&lt; listOf (fib 30)) :: [Int])
+ 832040
+ 832040
+ 832040
+ 832040
+ 832040
+</code
+      ></pre
+    ><p
+    >The solutions are printed slowly one after the other if we use the default implementation of explicit sharing and almost simultaneously if we use the alternative version. The default version recomputes <code
+      >fib 30</code
+      > the alternative version does not.</p
     ></body
   ></html
 >
