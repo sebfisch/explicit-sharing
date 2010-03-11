@@ -104,7 +104,7 @@ instance Monad m => MonadState Store (Lazy m)
 -- 'Lazy' is a monad transformer.
 instance MonadTrans Lazy
  where
-  lift a = Lazy (\c s -> a >>= \x -> c x s)
+  lift a = Lazy (\c s -> a >>= flip c s)
 
 -- If the underlying monad supports IO we can lift this functionality.
 instance MonadIO m => MonadIO (Lazy m)

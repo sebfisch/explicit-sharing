@@ -19,7 +19,9 @@
 -- sharing.
 module Control.Monad.Sharing.Classes (
 
-  Sharing(..), Shareable(..), Convertible(..), convert
+  Sharing(..), Shareable(..), Convertible(..), convert,
+
+  MInt, MChar, MBool
 
  ) where
 
@@ -44,8 +46,12 @@ class Sharing m
 -- could be applied.
 class Shareable m a
  where
-  shareArgs :: Monad n 
-            => (forall b . Shareable m b => m b -> n (m b)) -> a -> n a
+  shareArgs :: Monad n => 
+               (forall b . Shareable m b => m b -> n (m b)) -> a -> n a
+
+type MInt  m = Int
+type MChar m = Char
+type MBool m = Bool
 
 instance Monad m => Shareable m Bool
  where
@@ -68,6 +74,10 @@ instance Monad m => Shareable m [Int]
   shareArgs _ = return
 
 instance Monad m => Shareable m [Char]
+ where
+  shareArgs _ = return
+
+instance Monad m => Shareable m (a -> b)
  where
   shareArgs _ = return
 
