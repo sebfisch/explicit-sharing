@@ -4,16 +4,16 @@
 -- with monadic deterministic programs.
 
 -- to compile, run:
--- ghc -fglasgow-exts -hide-package monads-fd -hide-package transformers -O2 -o reverse.mon --make reverse.hs
+-- ghc -O2 -o reverse.mon --make reverse.hs
 
 -- $ time ./reverse.fun 20000
--- user	0m8.637s
+-- user	0m8.804s
 
 -- $ time ./reverse.mon 20000
--- user	0m10.629s
+-- user	0m10.522s
 
 -- $ time ./reverse.mcc 20000
--- user	0m14.522s
+-- user	0m14.530s
 
 
 import Control.Monad.Sharing

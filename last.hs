@@ -1,18 +1,20 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
 -- to compile, run:
--- ghc -fglasgow-exts -hide-package monads-fd -hide-package transformers -O2 --make last
+-- ghc -O2 --make last
 
 -- $ time ./last 1000000 +RTS -H1000M -K20M
 -- True
--- user	0m2.760s
+-- user	0m1.154s
+
 -- $ time ./last 10000000 +RTS -H1000M -K20M
 -- True
--- user	0m24.483s
+-- user	0m9.263s
 
 -- $ time ./last.mcc 1000000 +RTS -h1000m -k20m
 -- 1000000
--- user	0m6.327s
+-- user	0m6.370s
+
 -- $ time ./last.mcc 10000000 +RTS -h2000m -k50m
 -- Not enough free memory after garbage collection
 
