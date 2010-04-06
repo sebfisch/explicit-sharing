@@ -36,7 +36,7 @@ instance Monad m => Shareable m ((Int,Int),(Int,Int))
 
 instance Monad m => Convertible m (Int,Int) (Int,Int)
  where
-  convArgs _ = return
+  convert = return
 
 instance (Monad m, Shareable m a) => Shareable m (m a, m a)
  where
@@ -44,7 +44,7 @@ instance (Monad m, Shareable m a) => Shareable m (m a, m a)
 
 instance (Monad m, Convertible m a b) => Convertible m (m a, m a) (b, b)
  where
-  convArgs f (x,y) = return (,) `ap` (x >>= f) `ap` (y >>= f)
+  convert (x,y) = return (,) `ap` (x >>= convert) `ap` (y >>= convert)
 
 assertEqual :: (Shareable (Lazy []) a, Convertible (Lazy []) a b, Eq b)
             => [b] -> Lazy [] a -> Bool
