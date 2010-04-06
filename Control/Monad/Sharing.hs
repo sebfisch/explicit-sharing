@@ -25,3 +25,5 @@ module Control.Monad.Sharing (
 import Control.Monad
 import Control.Monad.Sharing.Classes
 import Control.Monad.Sharing.Implementation.CPS
+-- import Control.Monad.Sharing.Implementation.SlowState
+-- import Control.Monad.Sharing.Implementation.SlowStateCPS

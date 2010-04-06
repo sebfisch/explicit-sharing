@@ -29,7 +29,9 @@ Library
                     Data.Monadic.Derive,
                     Data.Monadic.List
   Other-Modules:    Control.Monad.Sharing.Implementation.CPS,
-                    Control.Monad.Sharing.Implementation.FirstOrder
+                    Control.Monad.Sharing.Implementation.FirstOrder,
+                    Control.Monad.Sharing.Implementation.SlowState,
+                    Control.Monad.Sharing.Implementation.SlowStateCPS
   Ghc-Options:      -Wall -fno-warn-name-shadowing
   Extensions:       ExistentialQuantification,
                     MultiParamTypeClasses,

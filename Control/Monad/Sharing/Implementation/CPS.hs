@@ -21,7 +21,9 @@ module Control.Monad.Sharing.Implementation.CPS (
 
   Lazy, evalLazy, runLazy,
 
-  Store, emptyStore, freshLabel, lookupValue, storeValue
+  Store, emptyStore, freshLabel, lookupValue, storeValue,
+
+  Untyped(..), typed
 
  ) where
 
@@ -117,7 +119,6 @@ instance Monad m => Sharing (Lazy m)
 
 -- This is an inlined version of the following definition:
 
--- {-# SPECIALIZE memo :: Monad m => Lazy m a -> Lazy m (Lazy m a) #-}
 -- memo :: MonadState Store m => m a -> m (m a)
 -- memo a = do key <- freshLabel
 --             return $ do thunk <- lookupValue key

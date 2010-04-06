@@ -1,13 +1,27 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
 -- to compile, run:
--- ghc -fglasgow-exts -hide-package monads-fd -hide-package transformers -O2 --make permsort.hs
+-- ghc -O2 --make permsort.hs
 
 -- $ time ./permsort 20
--- user	0m13.265s
+-- user	0m8.909s
 
 -- time ./permsort.mcc 20
 -- user	0m25.067s
+
+-- Comparing different implementations
+
+-- standard StateT with unevaluated thunks in store
+-- user	1m41.645s
+
+-- continition monad with unevaluated thunks in store
+-- user	0m37.073s
+
+-- continuation monad with fewer store operations
+-- user	0m29.517s
+
+-- additionally with hand optimized memo function
+-- user	0m8.909s
 
 
 import Control.Monad.Sharing
