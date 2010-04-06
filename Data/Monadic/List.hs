@@ -54,21 +54,25 @@ rest ml = do Cons _ xs <- ml; xs
 -- 'Control.Monad.Sharing.share' combinator.
 instance (Monad m, Shareable m a) => Shareable m (List m a)
  where
-  shareArgs _ Nil         = return Nil
-  shareArgs f (Cons x xs) = return Cons `ap` f x `ap` f xs
+  shareArgs f Nil         = return Nil
+  shareArgs f (Cons x xs) = do y  <- f x
+                               ys <- f xs
+                               return (Cons y ys)
 
 -- |
 -- This instance enables the function 'Control.Monad.Sharing.convert'
 -- to transform ordinary Haskell lists into nested monadic lists.
 instance (Monad m, Convertible m a b) => Convertible m [a] (List m b)
  where
-  convArgs _ []     = return Nil
-  convArgs f (x:xs) = return (Cons (f x) (f xs))
+  convert []     = return Nil
+  convert (x:xs) = return (Cons (convert x) (convert xs))
 
 -- |
 -- This instance enables the function 'Control.Monad.Sharing.convert'
 -- to transform nested monadic lists into ordinary Haskell lists.
 instance (Monad m, Convertible m a b) => Convertible m (List m a) [b]
  where
-  convArgs _ Nil         = return []
-  convArgs f (Cons x xs) = return (:) `ap` (x >>= f) `ap` (xs >>= f)
+  convert Nil         = return []
+  convert (Cons x xs) = do y  <- x  >>= convert
+                           ys <- xs >>= convert
+                           return (y:ys)

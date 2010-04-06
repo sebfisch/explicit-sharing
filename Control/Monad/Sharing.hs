@@ -14,7 +14,7 @@ module Control.Monad.Sharing (
 
   -- * Classes
 
-  Sharing(..), Shareable(..), Convertible(..), convert,
+  Sharing(..), Shareable(..), Convertible(..),
 
   -- * Monad transformer
 

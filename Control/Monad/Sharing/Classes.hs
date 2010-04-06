@@ -19,7 +19,7 @@
 -- sharing.
 module Control.Monad.Sharing.Classes (
 
-  Sharing(..), Shareable(..), Convertible(..), convert,
+  Sharing(..), Shareable(..), Convertible(..),
 
   MInt, MChar, MBool
 
@@ -46,7 +46,7 @@ class Sharing m
 -- could be applied.
 class Shareable m a
  where
-  shareArgs :: Monad n => 
+  shareArgs :: Monad n =>
                (forall b . Shareable m b => m b -> n (m b)) -> a -> n a
 
 type MInt  m = Int
@@ -98,46 +98,42 @@ instance (Monad m, Shareable m a) => Shareable m [m a]
 -- could be applied.
 class Convertible m a b
  where
-  convArgs :: (forall c d . Convertible m c d => c -> m d) -> a -> m b
-
--- | Converts a convertible value recursively.
-convert :: Convertible m a b => a -> m b
-convert = convArgs convert
+  convert :: a -> m b
 
 instance Monad m => Convertible m Bool Bool
  where
-  convArgs _ = return
+  convert = return
 
 instance Monad m => Convertible m Int Int
  where
-  convArgs _ = return
+  convert = return
 
 instance Monad m => Convertible m Char Char
  where
-  convArgs _ = return
+  convert = return
 
 instance Monad m => Convertible m [Bool] [Bool]
  where
-  convArgs _ = return
+  convert = return
 
 instance Monad m => Convertible m [Int] [Int]
  where
-  convArgs _ = return
+  convert = return
 
 instance Monad m => Convertible m [Char] [Char]
  where
-  convArgs _ = return
+  convert = return
 
 -- |
 -- An instance to convert ordinary lists into lists with monadic
 -- elements.
 instance (Monad m, Convertible m a b) => Convertible m [a] [m b]
  where
-  convArgs f = return . map f
+  convert = return . map convert
 
 -- |
 -- An instance to convert lists with monadic elements into ordinary
 -- lists.
 instance (Monad m, Convertible m a b) => Convertible m [m a] [b]
  where
-  convArgs f = mapM (>>=f)
+  convert = mapM (>>=convert)
