@@ -36,8 +36,6 @@ import Unsafe.Coerce
 
 import qualified Data.IntMap as M
 
--- import Debug.Trace ( trace )
-
 -- |
 -- Continuation-based, store-passing implementation of explicit
 -- sharing. It is an inlined version of @ContT (ReaderT Store m)@
