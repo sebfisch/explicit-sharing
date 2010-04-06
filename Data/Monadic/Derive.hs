@@ -19,6 +19,8 @@ import Control.Monad.Error
 import Control.Applicative
 import Control.Arrow
 
+-- import Debug.Trace
+
 typeParamName, branchResName, funArgName :: String
 typeParamName = "m"; branchResName = "a"; funArgName = "fun"
 
@@ -323,13 +325,13 @@ convInsts d = fail $ "Cannot make Convertible instances for " ++ show d
 
 makeConvToM :: QualConDecl -> Conv Match
 makeConvToM (QualConDecl _ [] [] con) =
-  return $ Match sl (Ident "convArgs") [PVar fun,cpat] Nothing
+  return $ Match sl fun [cpat] Nothing
              (UnGuardedRhs rhs) (BDecls [])
  where
   name = consName con
   args = map (Ident.(:[]).fst) . zip ['a'..] $ consArgs con
 
-  fun  = Ident funArgName
+  fun  = Ident "convert"
   cpat = UnQual name `PApp` map PVar args
 
   rhs  = foldl App (Var (UnQual (convName False name))) $
@@ -339,13 +341,13 @@ makeConvToM c = fail $ "Cannot make convArgs rule for " ++ show c
 
 makeConvFromM :: QualConDecl -> Conv Match
 makeConvFromM (QualConDecl _ [] [] con) =
-  return $ Match sl (Ident "convArgs") [PVar fun,cpat] Nothing
+  return $ Match sl fun [cpat] Nothing
              (UnGuardedRhs rhs) (BDecls [])
  where
   name = consName con
   args = map (Ident.(:[]).fst) . zip ['a'..] $ consArgs con
 
-  fun  = Ident funArgName
+  fun  = Ident "convert"
   cpat = UnQual (convName True name) `PApp` map PVar args
   cexp = foldl App (Con (UnQual name)) $ map (Var . UnQual) args
 
