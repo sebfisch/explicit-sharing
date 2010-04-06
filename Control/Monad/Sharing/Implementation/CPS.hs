@@ -116,16 +116,17 @@ instance Monad m => Sharing (Lazy m)
   share a = memo (a >>= shareArgs share)
 
 -- This is an inlined version of the following definition:
--- 
--- > memo :: MonadState Store m => m a -> m (m a)
--- > memo a = do key <- freshLabel
--- >             return $ do thunk <- lookupValue key
--- >                         case thunk of
--- >                           Just x  -> return x
--- >                           Nothing -> do x <- a
--- >                                         storeValue key x
--- >                                         return x
---
+
+-- {-# SPECIALIZE memo :: Monad m => Lazy m a -> Lazy m (Lazy m a) #-}
+-- memo :: MonadState Store m => m a -> m (m a)
+-- memo a = do key <- freshLabel
+--             return $ do thunk <- lookupValue key
+--                         case thunk of
+--                           Just x  -> return x
+--                           Nothing -> do x <- a
+--                                         storeValue key x
+--                                         return x
+
 memo :: Lazy m a -> Lazy m (Lazy m a)
 memo a = Lazy (\c (Store key heap) ->
       c (Lazy (\c s@(Store _ heap) -> 

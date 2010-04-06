@@ -16,7 +16,7 @@ module Control.Monad.Sharing.FirstOrder (
 
   -- * Classes
 
-  Sharing(..), Shareable(..), Convertible(..), convert,
+  Sharing(..), Shareable(..), Convertible(..),
 
   -- * Monad transformer
 

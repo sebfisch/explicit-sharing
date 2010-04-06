@@ -16,7 +16,7 @@ module Data.Monadic.List (
 
  ) where
 
-import Control.Monad                 ( MonadPlus, ap )
+import Control.Monad                 ( MonadPlus )
 import Control.Monad.Sharing.Classes ( Shareable(..), Convertible(..) )
 
 -- | Data type for lists where both the head and tail are monadic.
@@ -54,7 +54,7 @@ rest ml = do Cons _ xs <- ml; xs
 -- 'Control.Monad.Sharing.share' combinator.
 instance (Monad m, Shareable m a) => Shareable m (List m a)
  where
-  shareArgs f Nil         = return Nil
+  shareArgs _ Nil         = return Nil
   shareArgs f (Cons x xs) = do y  <- f x
                                ys <- f xs
                                return (Cons y ys)
