@@ -8,6 +8,7 @@ module Control.Monad.Sharing.Implementation.SlowState (
 
  ) where
 
+import Data.Maybe ( fromJust )
 import Control.Monad.State
 
 import qualified Data.IntMap as M
@@ -48,7 +49,6 @@ getFreshKey = do s <- get
 
 lookupThunk :: MonadState ThunkStore m => Int -> m (Thunk m a)
 lookupThunk k = gets (typed . fromJust . M.lookup k . heap)
- where fromJust (Just x) = x
 
 insertThunk :: MonadState ThunkStore m => Int -> a -> m ()
 insertThunk k v = modify (\s -> s { heap = M.insert k (Untyped v) (heap s) })
