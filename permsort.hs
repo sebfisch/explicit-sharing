@@ -9,7 +9,7 @@
 -- time ./permsort.mcc 20
 -- user	0m25.067s
 
--- Comparing different implementations
+-- Comparing different implementations using GHC 6.12.1
 
 -- standard StateT with unevaluated thunks in store
 -- user	1m41.645s
