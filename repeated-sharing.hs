@@ -37,10 +37,10 @@ data Bin = Tip | Bin Bin Bin -- ; $(derive monadic ''Bin)
 -- used refs: 2036
 -- 2047
 
-main = print . pow2 . read . head =<< getArgs
+main = print . test . read . head =<< getArgs
 
-pow2 :: Int -> Int
-pow2 = head . evalLazy . size . complete
+test :: Int -> Int
+test = head . evalLazy . size . complete
 
 complete :: (Monad m, Sharing m) => Int -> m (MBin m)
 complete 0     = mTip
