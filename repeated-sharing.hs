@@ -17,25 +17,25 @@ data Bin = Tip | Bin Bin Bin -- ; $(derive monadic ''Bin)
 --
 -- # for n in `gseq 1 10`; do ./repeated-sharing $n; done
 -- used refs: 1
--- 2
+-- 3
 -- used refs: 4
--- 4
+-- 7
 -- used refs: 11
--- 8
+-- 15
 -- used refs: 26
--- 16
+-- 31
 -- used refs: 57
--- 32
+-- 63
 -- used refs: 120
--- 64
+-- 127
 -- used refs: 247
--- 128
+-- 255
 -- used refs: 502
--- 256
+-- 511
 -- used refs: 1013
--- 512
+-- 1023
 -- used refs: 2036
--- 1024
+-- 2047
 
 main = print . pow2 . read . head =<< getArgs
 
@@ -51,7 +51,7 @@ size :: Monad m => m (MBin m) -> m Int
 size t = matchMBin t (return 1)
                      (\l r -> do m <- size l
                                  n <- size r
-                                 return (m+n))
+                                 return (m+n+1))
 
 -- custom monadic data with 'arguments are already shared' flag:
 
@@ -89,22 +89,22 @@ instance Monad m => Convertible m (MBin m) Bin where
 
 -- # for n in `gseq 1 10`; do ./repeated-sharing $n; done
 -- used refs: 1
--- 2
+-- 3
 -- used refs: 4
--- 4
+-- 7
 -- used refs: 7
--- 8
+-- 15
 -- used refs: 10
--- 16
+-- 31
 -- used refs: 13
--- 32
+-- 63
 -- used refs: 16
--- 64
+-- 127
 -- used refs: 19
--- 128
+-- 255
 -- used refs: 22
--- 256
+-- 511
 -- used refs: 25
--- 512
+-- 1023
 -- used refs: 28
--- 1024
+-- 2047
