@@ -8,11 +8,15 @@
 -- Automatic deriving of monadic data types and corresponding instances.
 module Data.Monadic.Derive (
 
-  monadic, makeMData, makeShareable, makeConvertible
+  derive,
+
+  monadic, mdata, shareable, convertible
 
   ) where
 
 import Language.Haskell
+
+import Data.DeriveTH ( derive )
 import Data.Derive.Internal.Derivation
 
 import Control.Monad.Error
@@ -48,7 +52,7 @@ typeParamName = "m"; branchResName = "a"; funArgName = "fun"
 -- > $(derive monadic ''Maybe)
 -- 
 monadic :: Derivation
-monadic = derivationCustom "Monadic"
+monadic = derivationCustom "monadic"
             (\ (_,d) -> concat <$> mapM ($d) [convData,shareableInst,convInsts])
 
 -- | Generates a monadic datatype and corresponding con- and
@@ -60,7 +64,7 @@ monadic = derivationCustom "Monadic"
 -- 
 --   can be translated into its monadic counterpart by typing
 -- 
--- > $(derive makeMData ''Maybe)
+-- > $(derive mdata ''Maybe)
 -- 
 --   This call generates the following datatype
 -- 
@@ -78,14 +82,14 @@ monadic = derivationCustom "Monadic"
 -- > matchMMaybe :: Monad m => m (MMaybe m a) -> m b -> (m a -> m b) -> m b
 -- > matchMMaybe x n j = x >>= \x -> case x of { MNothing -> n; MJust a -> j a }
 -- 
-makeMData :: Derivation
-makeMData = derivationCustom "MData" (convData . snd)
+mdata :: Derivation
+mdata = derivationCustom "mdata" (convData . snd)
 
 -- | Generates a 'Shareable' instance for a monadic datatype.
 -- 
 --   For example the call
 -- 
--- > $(derive makeShareable ''Maybe)
+-- > $(derive shareable ''Maybe)
 -- 
 --   generates the following instance:
 -- 
@@ -93,15 +97,15 @@ makeMData = derivationCustom "MData" (convData . snd)
 -- >   shareArgs fun MNothing  = return MNothing
 -- >   shareArgs fun (MJust a) = fun a >>= \a -> mJust a
 -- 
-makeShareable :: Derivation
-makeShareable = derivationCustom "Shareable" (shareableInst . snd)
+shareable :: Derivation
+shareable = derivationCustom "shareable" (shareableInst . snd)
 
 -- | Generates 'Convertible' instances to convert between monadic and
 --   non-monadic datatypes.
 -- 
 --   For example, the call
 -- 
--- > $(derive makeConvertible ''Maybe)
+-- > $(derive convertible ''Maybe)
 -- 
 --   generates the following instances:
 -- 
@@ -115,8 +119,8 @@ makeShareable = derivationCustom "Shareable" (shareableInst . snd)
 -- >   convArgs fun MNothing  = return Nothing
 -- >   convArgs fun (MJust a) = (a >>= fun) >>= \a -> return (Just a)
 -- 
-makeConvertible :: Derivation
-makeConvertible = derivationCustom "Convertible" (convInsts . snd)
+convertible :: Derivation
+convertible = derivationCustom "convertible" (convInsts . snd)
 
 -- printDecls (Left s) = Left s
 -- printDecls (Right ds) = trace (unlines . map prettyPrint $ ds) (Right ds)

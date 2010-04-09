@@ -62,7 +62,9 @@ evalLazy m = runLazy (m >>= convert)
 
 runLazy :: Monad m => Lazy m a -> m a
 runLazy m = fromLazy m (\a _ -> return a) emptyStore
-  -- fromLazy m (\a s -> trace (show (nextLabel s)) (return a)) emptyStore
+--   fromLazy m
+--     (\a s -> trace ("used refs: "++show (nextLabel s-1)) (return a))
+--     emptyStore
 
 -- Stores consist of a fresh-reference counter and a heap represented
 -- as IntMap.

@@ -61,6 +61,18 @@ instance Monad m => Shareable m Int
  where
   shareArgs _ = return
 
+instance Monad m => Shareable m Integer
+ where
+  shareArgs _ = return
+
+instance Monad m => Shareable m Float
+ where
+  shareArgs _ = return
+
+instance Monad m => Shareable m Double
+ where
+  shareArgs _ = return
+
 instance Monad m => Shareable m Char
  where
   shareArgs _ = return
@@ -70,6 +82,18 @@ instance Monad m => Shareable m [Bool]
   shareArgs _ = return
 
 instance Monad m => Shareable m [Int]
+ where
+  shareArgs _ = return
+
+instance Monad m => Shareable m [Integer]
+ where
+  shareArgs _ = return
+
+instance Monad m => Shareable m [Float]
+ where
+  shareArgs _ = return
+
+instance Monad m => Shareable m [Double]
  where
   shareArgs _ = return
 
@@ -108,6 +132,18 @@ instance Monad m => Convertible m Int Int
  where
   convert = return
 
+instance Monad m => Convertible m Integer Integer
+ where
+  convert = return
+
+instance Monad m => Convertible m Float Float
+ where
+  convert = return
+
+instance Monad m => Convertible m Double Double
+ where
+  convert = return
+
 instance Monad m => Convertible m Char Char
  where
   convert = return
@@ -117,6 +153,18 @@ instance Monad m => Convertible m [Bool] [Bool]
   convert = return
 
 instance Monad m => Convertible m [Int] [Int]
+ where
+  convert = return
+
+instance Monad m => Convertible m [Integer] [Integer]
+ where
+  convert = return
+
+instance Monad m => Convertible m [Float] [Float]
+ where
+  convert = return
+
+instance Monad m => Convertible m [Double] [Double]
  where
   convert = return
 
