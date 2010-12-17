@@ -1,5 +1,5 @@
 Name:          explicit-sharing
-Version:       0.7
+Version:       0.8
 Cabal-Version: >= 1.6
 Synopsis:      Explicit Sharing of Monadic Effects
 Description:   
@@ -17,12 +17,12 @@ Bug-Reports:   http://github.com/sebfisch/explicit-sharing/issues
 Build-Type:    Custom
 Stability:     experimental
 
-Extra-Source-Files: Test.hs
+Extra-Source-Files: Test.hs, permsort.hs, reverse.hs, last.hs
 
 Library
-  Build-Depends:    base >= 3 && < 5, containers, mtl,
-                    template-haskell >= 2.4 && < 2.5,
-                    derive >= 2.3.0.1 && < 2.4
+  Build-Depends:    base >= 3 && < 5, containers, mtl < 2,
+                    template-haskell >= 2.4 && < 2.6,
+                    derive >= 2.3.0.1 && < 2.5
   Exposed-Modules:  Control.Monad.Sharing,
                     Control.Monad.Sharing.Classes,
                     Control.Monad.Sharing.FirstOrder,

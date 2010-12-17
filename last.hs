@@ -26,8 +26,8 @@ import Prelude hiding ( last )
 
 main =
  do n <- liftM (read.head) getArgs
-    let result = evalLazy . last . convert $ replicate n True
-    mapM_ print (result :: [Bool])
+    let result = runSharing(last(convert(replicate n True))>>=convert)::[Bool]
+    mapM_ print result
 
 last :: (MonadPlus m, Sharing m) => m (List m Bool) -> m Bool
 last l = do x <- share freeBool

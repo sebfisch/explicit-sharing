@@ -18,7 +18,7 @@ module Control.Monad.Sharing (
 
   -- * Monad transformer
 
-  Lazy, evalLazy
+  Lazy, evalLazy, runSharing
 
  ) where
 

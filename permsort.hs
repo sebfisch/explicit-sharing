@@ -31,8 +31,8 @@ import System ( getArgs )
 
 main = do
   n <- liftM (read.head) getArgs
-  let result = evalLazy . sort . convert $ [(1::Int)..n]
-  mapM_ print (result :: [[Int]])
+  let result = runSharing (sort (convert [(1::Int)..n]) >>= convert) :: [[Int]]
+  mapM_ print result
 
 
 

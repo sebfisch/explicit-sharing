@@ -32,8 +32,9 @@ rev (x:xs) = rev xs ++ [x]
 
 main_mon =
  do n <- liftM (read.head) getArgs
-    let result = evalLazy $ length' =<< rev' =<< convert [(1::Int)..n]
-    mapM_ print (result :: [Int])
+    let result =
+          runSharing(convert=<<(length'=<<rev'=<<convert[(1::Int)..n]))::[Int]
+    mapM_ print result
 
 length' :: Monad m => List m a -> m Int
 length' Nil         = return 0

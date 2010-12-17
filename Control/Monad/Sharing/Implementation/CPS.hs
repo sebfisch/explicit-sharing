@@ -19,7 +19,7 @@
 -- performance.
 module Control.Monad.Sharing.Implementation.CPS (
 
-  Lazy, evalLazy, runLazy,
+  Lazy, runLazy, evalLazy, runSharing,
 
   Store, emptyStore, freshLabel, lookupValue, storeValue,
 
@@ -52,11 +52,15 @@ newtype Lazy m a = Lazy {
   fromLazy :: forall w . (a -> Store -> m w) -> Store -> m w
  }
 
+runSharing :: MonadPlus m => (forall s.(MonadPlus s,Sharing s) => s a) -> m a
+runSharing a = runLazy a
+
 -- |
 -- Lifts all monadic effects to the top-level and unwraps the monad
 -- transformer for explicit sharing.
 evalLazy :: (Monad m, Convertible (Lazy m) a b) => Lazy m a -> m b
 evalLazy m = runLazy (m >>= convert)
+{-# DEPRECATED evalLazy "Please use runSharing instead" #-}
 
 -- private declarations
 
