@@ -35,3 +35,7 @@ Library
                     FlexibleContexts,
                     RelaxedPolyRec,
                     Rank2Types
+
+Source-Repository head
+  type:     git
+  location: git://github.com/sebfisch/explicit-sharing.git
