@@ -19,7 +19,7 @@
 -- performance.
 module Control.Monad.Sharing.Implementation.CPS (
 
-  Lazy, runLazy, evalLazy, runSharing,
+  collect,
 
   Store, emptyStore, freshLabel, lookupValue, storeValue,
 
@@ -29,7 +29,6 @@ module Control.Monad.Sharing.Implementation.CPS (
 
 import Control.Monad       ( MonadPlus(..) )
 import Control.Monad.State ( MonadState(..), gets, modify )
-import Control.Monad.Trans ( MonadTrans(..), MonadIO(..) )
 
 import Control.Monad.Sharing.Classes
 
@@ -42,32 +41,24 @@ import qualified Data.IntMap as M
 
 -- |
 -- Continuation-based, store-passing implementation of explicit
--- sharing. It is an inlined version of @ContT (ReaderT Store m)@
--- where the result type of continuations is polymorphic.
-newtype Lazy m a = Lazy {
+-- sharing. It is an inlined version of @ContT n (Reader Store)@.
+newtype Lazy n a = Lazy {
 
   -- |
-  -- Runs a computation of type @Lazy m a@ with given continuation and
+  -- Runs a computation of type @Lazy n a@ with given continuation and
   -- store.
-  fromLazy :: forall w . (a -> Store -> m w) -> Store -> m w
+  fromLazy :: (a -> Store -> n) -> Store -> n
  }
 
-runSharing :: MonadPlus m => (forall s.(MonadPlus s,Sharing s) => s a) -> m a
-runSharing a = runLazy a
-
--- |
--- Lifts all monadic effects to the top-level and unwraps the monad
--- transformer for explicit sharing.
-evalLazy :: (Monad m, Convertible (Lazy m) a b) => Lazy m a -> m b
-evalLazy m = runLazy (m >>= convert)
-{-# DEPRECATED evalLazy "Please use runSharing instead" #-}
+collect :: Nondet n => (forall s. Sharing s => s n) -> n
+collect a = runLazy a
 
 -- private declarations
 
-runLazy :: Monad m => Lazy m a -> m a
-runLazy m = fromLazy m (\a _ -> return a) emptyStore
+runLazy :: Nondet n => Lazy n n -> n
+runLazy m = fromLazy m (\a _ -> a) emptyStore
 --   fromLazy m
---     (\a s -> trace ("used refs: "++show (nextLabel s-1)) (return a))
+--     (\a s -> trace ("used refs: "++show (nextLabel s-1)) a)
 --     emptyStore
 
 -- Stores consist of a fresh-reference counter and a heap represented
@@ -90,36 +81,26 @@ storeValue k v = modify (\s -> s { heap = M.insert k (Untyped v) (heap s) })
 
 -- The monad instance is an inlined version of the instances for
 -- continuation and reader monads.
-instance Monad m => Monad (Lazy m)
+instance Nondet n => Monad (Lazy n)
  where
   return x = Lazy (\c -> c x)
   a >>= k  = Lazy (\c s -> fromLazy a (\x -> fromLazy (k x) c) s)
-  fail err = Lazy (\_ _ -> fail err)
+  fail _   = Lazy (\_ _ -> failure)
 
 -- The 'MonadPlus' instance reuses corresponding operations of the
--- base monad.
-instance MonadPlus m => MonadPlus (Lazy m)
+-- underlying 'Nondet' instance.
+instance Nondet n => MonadPlus (Lazy n)
  where
-  mzero       = Lazy (\_ _ -> mzero)
-  a `mplus` b = Lazy (\c s -> fromLazy a c s `mplus` fromLazy b c s)
+  mzero       = Lazy (\_ _ -> failure)
+  a `mplus` b = Lazy (\c s -> fromLazy a c s ? fromLazy b c s)
 
 -- A Cont/Reader monad is an instance of MonadState
-instance Monad m => MonadState Store (Lazy m)
+instance Nondet n => MonadState Store (Lazy n)
  where
   get   = Lazy (\c s -> c s s)
   put s = Lazy (\c _ -> c () s)
 
--- 'Lazy' is a monad transformer.
-instance MonadTrans Lazy
- where
-  lift a = Lazy (\c s -> a >>= flip c s)
-
--- If the underlying monad supports IO we can lift this functionality.
-instance MonadIO m => MonadIO (Lazy m)
- where
-  liftIO = lift . liftIO
-
-instance Monad m => Sharing (Lazy m)
+instance Nondet n => Sharing (Lazy n)
  where
   share a = memo (a >>= shareArgs share)
 

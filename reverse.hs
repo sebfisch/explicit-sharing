@@ -6,14 +6,17 @@
 -- to compile, run:
 -- ghc -O2 -o reverse.mon --make reverse.hs
 
--- $ time ./reverse.fun 20000
--- user	0m8.804s
+-- $ time ./reverse.fun 10000
+-- real 0m1.942s
+-- user 0m1.920s
 
--- $ time ./reverse.mon 20000
--- user	0m10.522s
+-- $ time ./reverse.mon 10000
+-- real 0m10.774s
+-- user 0m10.730s
 
--- $ time ./reverse.mcc 20000
--- user	0m14.530s
+-- $ time ./reverse.mcc 10000
+-- real 0m1.945s
+-- user 0m1.410s
 
 
 import Control.Monad.Sharing
@@ -32,9 +35,8 @@ rev (x:xs) = rev xs ++ [x]
 
 main_mon =
  do n <- liftM (read.head) getArgs
-    let result =
-          runSharing(convert=<<(length'=<<rev'=<<convert[(1::Int)..n]))::[Int]
-    mapM_ print result
+    result <- resultList (convert=<<(length'=<<rev'=<<convert[(1::Int)..n]))
+    mapM_ print (result :: [Int])
 
 length' :: Monad m => List m a -> m Int
 length' Nil         = return 0

@@ -1,11 +1,11 @@
 Name:          explicit-sharing
-Version:       0.8
+Version:       0.9
 Cabal-Version: >= 1.6
 Synopsis:      Explicit Sharing of Monadic Effects
 Description:   
 
-  This package implements a monad transformer for sharing monadic
-  effects.
+  This package implements a monad for non-deterministic computations
+  with sharing.
 
 Category:      Control, Monads
 License:       PublicDomain
@@ -25,13 +25,9 @@ Library
                     derive >= 2.3.0.1 && < 2.5
   Exposed-Modules:  Control.Monad.Sharing,
                     Control.Monad.Sharing.Classes,
-                    Control.Monad.Sharing.FirstOrder,
                     Data.Monadic.Derive,
                     Data.Monadic.List
-  Other-Modules:    Control.Monad.Sharing.Implementation.CPS,
-                    Control.Monad.Sharing.Implementation.FirstOrder,
-                    Control.Monad.Sharing.Implementation.SlowState,
-                    Control.Monad.Sharing.Implementation.SlowStateCPS
+  Other-Modules:    Control.Monad.Sharing.Implementation.CPS
   Ghc-Options:      -Wall -fno-warn-name-shadowing
   Extensions:       ExistentialQuantification,
                     MultiParamTypeClasses,

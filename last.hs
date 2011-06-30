@@ -1,19 +1,22 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
 -- to compile, run:
--- ghc -O2 --make last
+-- ghc -rtsopts -O2 --make last
 
--- $ time ./last 1000000 +RTS -H1000M -K20M
+-- $ time ./last 1000000 +RTS -H2000M -K50M
 -- True
--- user	0m1.154s
+-- real 0m2.898s
+-- user 0m2.050s
 
--- $ time ./last 10000000 +RTS -H1000M -K20M
+-- $ time ./last 10000000 +RTS -H2000M -K50M
 -- True
--- user	0m9.263s
+-- real 0m20.585s
+-- user 0m19.470s
 
--- $ time ./last.mcc 1000000 +RTS -h1000m -k20m
+-- $ time ./last.mcc 1000000 +RTS -h2000m -k50m
 -- 1000000
--- user	0m6.370s
+-- real 0m4.895s
+-- user 0m3.960s
 
 -- $ time ./last.mcc 10000000 +RTS -h2000m -k50m
 -- Not enough free memory after garbage collection
@@ -26,8 +29,8 @@ import Prelude hiding ( last )
 
 main =
  do n <- liftM (read.head) getArgs
-    let result = runSharing(last(convert(replicate n True))>>=convert)::[Bool]
-    mapM_ print result
+    result <- resultList (last(convert(replicate n True))>>=convert)
+    mapM_ print (result :: [Bool])
 
 last :: (MonadPlus m, Sharing m) => m (List m Bool) -> m Bool
 last l = do x <- share freeBool

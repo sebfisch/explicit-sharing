@@ -4,24 +4,20 @@
 -- ghc -O2 --make permsort.hs
 
 -- $ time ./permsort 20
--- user	0m8.909s
+-- real 0m14.049s
+-- user 0m13.990s
 
 -- time ./permsort.mcc 20
--- user	0m25.067s
+-- real 0m13.121s
+-- user 0m10.900s
 
--- Comparing different implementations using GHC 6.12.1
+-- Other implementations using GHC 7.0.3
 
--- standard StateT with unevaluated thunks in store
--- user	1m41.645s
-
--- continition monad with unevaluated thunks in store
+-- continuation monad with unevaluated thunks in store
 -- user	0m37.073s
 
 -- continuation monad with fewer store operations
 -- user	0m29.517s
-
--- additionally with hand optimized memo function
--- user	0m8.909s
 
 
 import Control.Monad.Sharing
@@ -31,8 +27,8 @@ import System ( getArgs )
 
 main = do
   n <- liftM (read.head) getArgs
-  let result = runSharing (sort (convert [(1::Int)..n]) >>= convert) :: [[Int]]
-  mapM_ print result
+  result <- resultList (sort (convert [(1::Int)..n]) >>= convert)
+  mapM_ print (result :: [[Int]])
 
 
 

@@ -19,21 +19,26 @@
 -- sharing.
 module Control.Monad.Sharing.Classes (
 
-  Sharing(..), Shareable(..), Convertible(..),
+  Sharing(..), Shareable(..), Convertible(..), Nondet(..),
 
   MInt, MChar, MBool
 
  ) where
 
+import Control.Monad ( MonadPlus )
+
+import qualified Data.Set as Set
+import qualified Data.Map as Map
+
 -- | Interface of monads that support explicit sharing.
-class Sharing m
+class MonadPlus s => Sharing s
  where
   -- | 
   -- Yields an action that returns the same results as the given
   -- action but whose effects are only executed once. Especially, when
   -- the resulting action is duplicated it returns the same result at
   -- every occurrence.
-  share :: Shareable m a => m a -> m (m a)
+  share :: Shareable s a => s a -> s (s a)
 
 -- |
 -- Interface of shareable nested monadic data types. The provided
@@ -185,3 +190,29 @@ instance (Monad m, Convertible m a b) => Convertible m [a] [m b]
 instance (Monad m, Convertible m a b) => Convertible m [m a] [b]
  where
   convert = mapM (>>=convert)
+
+-- |
+
+-- Instances of this class can be used to observe non-deterministic
+-- computations with sharing. The function '?' must satisfy the
+-- following laws:
+--
+-- @
+--                 a ? a  =  a
+--     (a ? b) ? (c ? d)  =  (a ? c) ? (b ? d)
+-- @
+class Nondet n where
+  failure :: n
+  (?)     :: n -> n -> n
+
+instance Nondet Bool where
+  failure = False
+  (?)     = (||)
+
+instance Ord a => Nondet (Set.Set a) where
+  failure = Set.empty
+  (?)     = Set.union
+
+instance Ord a => Nondet (Map.Map a Rational) where
+  failure = Map.empty
+  d1 ? d2 = Map.map (/2) $ Map.unionWith (+) d1 d2
